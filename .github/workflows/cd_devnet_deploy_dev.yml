@@ -8,7 +8,7 @@ on:
 
 jobs:
   dev_build:
-    uses: BetDexLabs/protocol-private/.github/workflows/ci_build_.yml@add-github-actions
+    uses: BetDexLabs/protocol-private/.github/workflows/ci_build_.yml@develop
     with:
       build_type: dev
     secrets:
@@ -18,7 +18,7 @@ jobs:
       solana_version: ${{ secrets.ORG_SOLANA_VERSION }}
 
   stable_build:
-    uses: BetDexLabs/protocol-private/.github/workflows/ci_build_.yml@add-github-actions
+    uses: BetDexLabs/protocol-private/.github/workflows/ci_build_.yml@develop
     with:
       build_type: stable
     secrets:
@@ -29,7 +29,7 @@ jobs:
 
   cd_deploy:
     needs: dev_build
-    uses: BetDexLabs/protocol-private/.github/workflows/cd_deploy_.yml@add-github-actions
+    uses: BetDexLabs/protocol-private/.github/workflows/cd_deploy_.yml@develop
     with:
       build: ${{ needs.dev_build.outputs.build_version }}
       environment: devnet

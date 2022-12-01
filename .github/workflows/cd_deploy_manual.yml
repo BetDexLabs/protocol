@@ -21,7 +21,7 @@ on:
 
 jobs:
   ci_build:
-    uses: BetDexLabs/protocol-private/.github/workflows/cd_deploy_.yml@add-github-actions
+    uses: BetDexLabs/protocol-private/.github/workflows/cd_deploy_.yml@develop
     with:
       build: ${{ github.event.inputs.build }}
       environment: ${{ github.event.inputs.environment }}

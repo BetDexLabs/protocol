@@ -10,7 +10,7 @@ on:
 
 jobs:
   cd_deploy:
-    uses: BetDexLabs/protocol-private/.github/workflows/cd_deploy_.yml@add-github-actions
+    uses: BetDexLabs/protocol-private/.github/workflows/cd_deploy_.yml@develop
     with:
       build: ${{ github.event.inputs.build }}
       environment: devnet

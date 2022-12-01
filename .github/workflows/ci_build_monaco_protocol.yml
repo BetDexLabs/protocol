@@ -14,7 +14,7 @@ on:
 
 jobs:
   ci_build:
-    uses: BetDexLabs/protocol-private/.github/workflows/ci_build_.yml@add-github-actions
+    uses: BetDexLabs/protocol-private/.github/workflows/ci_build_.yml@develop
     if: github.event.pull_request.draft == false
     with:
       build_type: dev
