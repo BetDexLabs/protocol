@@ -1,0 +1,42 @@
+name: CICD - Build & Release
+
+on:
+  push:
+    paths:
+      - 'programs/monaco_protocol/**'
+    branches: [ develop ]
+
+jobs:
+  dev_build:
+    uses: BetDexLabs/protocol-private/.github/workflows/ci_build_.yml@add-github-actions
+    with:
+      build_type: dev
+    secrets:
+      access_key_id: ${{ secrets.ORG_AWS_ACCESS_KEY_ID }}
+      access_key: ${{ secrets.ORG_AWS_SECRET_KEY }}
+      region: ${{ secrets.ORG_AWS_REGION }}
+      solana_version: ${{ secrets.ORG_SOLANA_VERSION }}
+
+  stable_build:
+    uses: BetDexLabs/protocol-private/.github/workflows/ci_build_.yml@add-github-actions
+    with:
+      build_type: stable
+    secrets:
+      access_key_id: ${{ secrets.ORG_AWS_ACCESS_KEY_ID }}
+      access_key: ${{ secrets.ORG_AWS_SECRET_KEY }}
+      region: ${{ secrets.ORG_AWS_REGION }}
+      solana_version: ${{ secrets.ORG_SOLANA_VERSION }}
+
+  cd_deploy:
+    needs: dev_build
+    uses: BetDexLabs/protocol-private/.github/workflows/cd_deploy_.yml@add-github-actions
+    with:
+      build: ${{ needs.dev_build.outputs.build_version }}
+      environment: devnet
+      note: "Auto-Deploy to Devnet"
+    secrets:
+      access_key_id: ${{ secrets.ORG_AWS_ACCESS_KEY_ID }}
+      access_key: ${{ secrets.ORG_AWS_SECRET_KEY }}
+      region: ${{ secrets.ORG_AWS_REGION }}
+      wallet_pass: ${{ secrets.ORG_DEV_WALLET_PASSPHRASE }}
+      gh_token: ${{ secrets.GITHUB_TOKEN }}

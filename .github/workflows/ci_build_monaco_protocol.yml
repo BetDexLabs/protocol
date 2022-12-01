@@ -1,0 +1,25 @@
+name: CI - Build Monaco Protocol
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize, ready_for_review]
+    paths:
+      - 'programs/monaco_protocol/**'
+      - 'tests/**'
+      - 'npm-client/**'
+      - '!npm-client/*.md'
+      - '!npm-client/package.json'
+      - 'Cargo.toml'
+    branches: [ develop, release, main ]
+
+jobs:
+  ci_build:
+    uses: BetDexLabs/protocol-private/.github/workflows/ci_build_.yml@add-github-actions
+    if: github.event.pull_request.draft == false
+    with:
+      build_type: dev
+    secrets:
+      access_key_id: ${{ secrets.ORG_AWS_ACCESS_KEY_ID }}
+      access_key: ${{ secrets.ORG_AWS_SECRET_KEY }}
+      region: ${{ secrets.ORG_AWS_REGION }}
+      solana_version: ${{ secrets.ORG_SOLANA_VERSION }}

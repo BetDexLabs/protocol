@@ -1,0 +1,34 @@
+name: CD - Deploy Program (Manual)
+
+on:
+  workflow_dispatch:
+    inputs:
+      build:
+        type: string
+        required: true
+        description: "Build to deploy e.g. 0.1.0.dev.4c721b7b"
+      environment:
+        type: choice
+        description: Environment to deploy to
+        options:
+        - devnet
+        - testnet
+      note:
+        type: string
+        description: "Note (optional)"
+        required: false
+        default: "Manual Deploy"
+
+jobs:
+  ci_build:
+    uses: BetDexLabs/protocol-private/.github/workflows/cd_deploy_.yml@add-github-actions
+    with:
+      build: ${{ github.event.inputs.build }}
+      environment: ${{ github.event.inputs.environment }}
+      note: ${{ github.event.inputs.note }}
+    secrets:
+      access_key_id: ${{ secrets.ORG_AWS_ACCESS_KEY_ID }}
+      access_key: ${{ secrets.ORG_AWS_SECRET_KEY }}
+      region: ${{ secrets.ORG_AWS_REGION }}
+      wallet_pass: ${{ secrets.ORG_DEV_WALLET_PASSPHRASE }}
+      gh_token: ${{ secrets.GITHUB_TOKEN }}
