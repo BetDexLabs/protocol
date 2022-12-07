@@ -10,7 +10,6 @@ on:
       - '!npm-client/*.md'
       - '!npm-client/package.json'
       - 'Cargo.toml'
-    branches: [ develop, release, main, feature/* ]
 
 jobs:
   ci_build:
