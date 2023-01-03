@@ -1,8 +1,9 @@
 #!/bin/bash
 
-# usage ci/version_manager/bump_client_version.sh -v < MAJOR | MINOR | PATCH > -c < CLIENT_TYPE >
+# usage ./ci/version_manager/bump_client_version.sh -v < MAJOR | MINOR | PATCH | DEV > -c < CLIENT_TYPE >
 
 VERSION_BUMP="PATCH"
+TIMESTAMP=`date +%s --utc`
 
 while getopts v:c: flag
 do
@@ -16,7 +17,7 @@ VERSION_FILE="./npm-client/package.json"
 
 if [ "$CLIENT" == "admin" ];
 then
-    VERSION_FILE="./npm-admin-client/package.json"    
+    VERSION_FILE="./npm-admin-client/package.json"
 fi
 
 echo "Updating $VERSION_FILE"
@@ -40,9 +41,13 @@ elif [ $VERSION_BUMP == "MINOR" ]
 then
     BUMP=`echo ${VERSION_BREAKDOWN[1]} + 1 | bc`
     NEXT_VERSION="${VERSION_BREAKDOWN[0]}.${BUMP}.0"
-else
+elif [ $VERSION_BUMP == "PATCH" ]
+then
     BUMP=`echo ${VERSION_BREAKDOWN[2]} + 1 | bc`
     NEXT_VERSION="${VERSION_BREAKDOWN[0]}.${VERSION_BREAKDOWN[1]}.${BUMP}"
+else
+    BUMP=`echo ${VERSION_BREAKDOWN[2]} + 1 | bc`
+    NEXT_VERSION="${VERSION_BREAKDOWN[0]}.${VERSION_BREAKDOWN[1]}.${BUMP}-dev.${TIMESTAMP}"
 fi
 
 echo "New version info: $NEXT_VERSION"

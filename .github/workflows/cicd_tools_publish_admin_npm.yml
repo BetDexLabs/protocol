@@ -8,9 +8,10 @@ on:
         description: Release type
         required: true
         options:
-        - PATCH
-        - MINOR
-        - MAJOR
+          - PATCH
+          - MINOR
+          - MAJOR
+          - DEV
 
 jobs:
   publish:
@@ -34,11 +35,18 @@ jobs:
           bash ${{ env.VERSION_MANAGER }}/bump_client_version.sh -v ${{ env.RELEASE_TYPE }} -c admin
 
       - name: Publish Package
+        if: ${{ github.event.inputs.release != 'DEV' }}
         run: |
           cd npm-admin-client
           npm install
-          npm run build
-          npm publish
+          npm run publishClient
+
+      - name: Publish Dev Package
+        if: ${{ github.event.inputs.release == 'DEV' }}
+        run: |
+          cd npm-admin-client
+          npm install
+          npm run publishDevClient
 
       - name: Commit Log Changes
         run: |
@@ -50,7 +58,7 @@ jobs:
           git commit --no-verify -m '${{ env.RELEASE_TYPE }} release of admin client'
           git push --set-upstream origin ${{ env.RELEASE_BRANCH }}
         env:
-            GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
 
       - name: Create PR
         run: |
