@@ -54,14 +54,15 @@ export async function addPricesToOutcome(
 
   try {
     const tnxId = await program.methods
-      .addPricesToMarketOutcome(marketPk, outcomeIndex, priceLadder)
+      .addPricesToMarketOutcome(outcomeIndex, priceLadder)
       .accounts({
         systemProgram: SystemProgram.programId,
         outcome: marketOutcomePda.data.pda,
+        market: marketPk,
         authorisedOperators: authorisedOperatorsPda.data.pda,
         marketOperator: provider.wallet.publicKey,
       })
-      .rpc();
+      .rpc({ commitment: "confirmed" });
 
     response.addResponseData({
       priceLadder: priceLadder,
