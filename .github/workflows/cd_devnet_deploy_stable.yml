@@ -21,3 +21,4 @@ jobs:
       region: ${{ secrets.ORG_AWS_REGION }}
       wallet_pass: ${{ secrets.ORG_DEV_WALLET_PASSPHRASE }}
       gh_token: ${{ secrets.GITHUB_TOKEN }}
+      solana_version: ${{ secrets.ORG_SOLANA_VERSION }}
