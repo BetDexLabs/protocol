@@ -49,23 +49,18 @@ pub fn create(
     Ok(())
 }
 
-pub fn initialize_outcome(
-    ctx: Context<InitializeMarketOutcome>,
-    title: String,
-    price_ladder: Vec<f64>,
-) -> Result<()> {
+pub fn initialize_outcome(ctx: Context<InitializeMarketOutcome>, title: String) -> Result<()> {
     require!(
         ctx.accounts.market.market_status == MarketStatus::Initializing,
         CoreError::MarketOutcomeMarketInvalidStatus
     );
-    verify_prices_precision(&price_ladder)?;
 
     ctx.accounts.outcome.market = ctx.accounts.market.key();
     ctx.accounts.outcome.index = ctx.accounts.market.market_outcomes_count;
     ctx.accounts.outcome.title = title;
     ctx.accounts.outcome.latest_matched_price = 0_f64;
     ctx.accounts.outcome.matched_total = 0_u64;
-    ctx.accounts.outcome.price_ladder = price_ladder;
+    ctx.accounts.outcome.price_ladder = vec![];
 
     ctx.accounts
         .market
@@ -79,7 +74,7 @@ fn verify_prices_precision(prices: &[f64]) -> Result<()> {
     require!(
         prices
             .iter()
-            .all(|&value| format!("{value}") <= format!("{value:.3}")),
+            .all(|&value| (format!("{value}")).len() <= (format!("{value:.3}")).len()),
         CoreError::MarketPricePrecisionTooLarge
     );
     Ok(())
@@ -161,5 +156,8 @@ mod tests {
 
         let not_ok_3 = verify_prices_precision(&vec![1.111, 1.11, 1.1, 1_f64, 1.1111]);
         assert!(not_ok_3.is_err());
+
+        let attempting_to_round_not_ok = verify_prices_precision(&vec![1.1118]);
+        assert!(attempting_to_round_not_ok.is_err());
     }
 }
