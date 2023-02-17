@@ -54,6 +54,8 @@ pub enum CoreError {
     SettlementMarketNotSettled,
     #[msg("Core Settlement: market not ready for settlement")]
     SettlementMarketNotReadyForSettlement,
+    #[msg("Core Settlement: market escrow is non zero")]
+    SettlementMarketEscrowNonZero,
 
     /*
     Authorised Operator
@@ -129,6 +131,8 @@ pub enum CoreError {
     MarketInvalidStatus,
     #[msg("Market: price list is full")]
     MarketPriceListIsFull,
+    #[msg("Market: price cannot be 1.0 or less")]
+    MarketPriceOneOrLess,
     #[msg("Market: price support up to 3 decimal places only")]
     MarketPricePrecisionTooLarge,
     #[msg("mint.decimals must be >= PRICE_SCALE (3)")]
@@ -180,6 +184,8 @@ pub enum CoreError {
     /*
     Close Account
      */
+    #[msg("CloseAccount: Order not complete")]
+    CloseAccountOrderNotComplete,
     #[msg("CloseAccount: Purchaser does not match")]
     CloseAccountPurchaserMismatch,
     #[msg("CloseAccount: Market does not match")]
