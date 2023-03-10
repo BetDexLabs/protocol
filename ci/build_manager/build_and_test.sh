@@ -19,6 +19,7 @@ done
 rm -f {build_log,test_log}
 touch test_log build_log
 
+yarn build | tee build_log
 cargo test 2>&1 | tee test_log
 anchor test 2>&1 | tee -a test_log
 anchor build -p ${PROGRAM} -- --features ${TYPE} 2>&1 | tee build_log
