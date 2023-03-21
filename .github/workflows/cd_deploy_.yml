@@ -12,6 +12,7 @@ on:
         type: string
         required: false
       solana_version:
+        type: string
         required: true
     secrets:
       access_key_id:
