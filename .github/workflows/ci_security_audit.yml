@@ -56,7 +56,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: /home/runner/.local/share/solana/
-          key: ${{ runner.os }}-solana-${{ secrets.ORG_SOLANA_VERSION }}
+          key: ${{ runner.os }}-solana-${{ vars.ORG_SOLANA_VERSION }}
 
       - name: Set Solana Path
         run: |
@@ -99,7 +99,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: /home/runner/.local/share/solana/
-          key: ${{ runner.os }}-solana-${{ secrets.ORG_SOLANA_VERSION }}
+          key: ${{ runner.os }}-solana-${{ vars.ORG_SOLANA_VERSION }}
 
       - name: Set Solana Path
         run: |

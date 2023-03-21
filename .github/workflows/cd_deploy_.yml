@@ -11,6 +11,8 @@ on:
       note:
         type: string
         required: false
+      solana_version:
+        required: true
     secrets:
       access_key_id:
         required: true
@@ -22,15 +24,13 @@ on:
         required: true
       gh_token:
         required: true
-      solana_version:
-        required: true
 
 jobs:
   deploy_program:
     runs-on: self-hosted
 
     env:
-      SOLANA_VERSION: ${{ secrets.solana_version }}
+      SOLANA_VERSION: ${{ inputs.solana_version }}
       SOLANA_PATH: /home/runner/.local/share/solana/install/active_release/bin
       DEVNET_URL: https://api.devnet.solana.com
       TESTNET_URL: https://api.testnet.solana.com
