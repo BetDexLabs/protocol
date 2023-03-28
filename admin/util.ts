@@ -3,7 +3,7 @@ import {
   Transaction,
   TransactionInstruction,
 } from "@solana/web3.js";
-import { AnchorProvider, getProvider, Program } from "@project-serum/anchor";
+import { AnchorProvider, getProvider, Program } from "@coral-xyz/anchor";
 import { getMint } from "@solana/spl-token";
 import { Buffer } from "buffer";
 import process from "process";
@@ -23,20 +23,23 @@ export async function findPdaWithSeeds(
 
 export async function getProtocolProgram() {
   const provider = getAnchorProvider();
-  const program = process.env.PROGRAM_TYPE;
 
-  if (program == undefined) {
-    console.log("Please ensure PROGRAM_TYPE variable is set <stable|dev>");
-    process.exit(1);
-    return;
-  }
-
-  // TODO need to support other clusters here too, e.g., localnet
-  const programId = PROGRAM_TYPE[program.toLowerCase()];
+  let programId = process.env.PROGRAM_ADDRESS;
   if (programId == undefined) {
-    console.log(`Program id not found for PROGRAM_TYPE ${program}`);
-    process.exit(1);
-    return;
+    const program = process.env.PROGRAM_TYPE;
+    if (program == undefined) {
+      console.log("Please ensure PROGRAM_TYPE variable is set <stable|dev>");
+      process.exit(1);
+      return;
+    }
+
+    // TODO need to support other clusters here too, e.g., localnet
+    programId = PROGRAM_TYPE[program.toLowerCase()];
+    if (programId == undefined) {
+      console.log(`Program id not found for PROGRAM_TYPE ${program}`);
+      process.exit(1);
+      return;
+    }
   }
 
   return Program.at(programId, provider);
