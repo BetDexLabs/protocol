@@ -13,7 +13,7 @@ on:
 
 jobs:
   ci_build:
-    uses: BetDexLabs/protocol-private/.github/workflows/ci_build_.yml@develop
+    uses: BetDexLabs/protocol-private/.github/workflows/ci_build_.yml@develop-ci
     if: github.event.pull_request.draft == false
     with:
       build_type: dev
