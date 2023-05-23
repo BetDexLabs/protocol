@@ -4,11 +4,11 @@ on:
   push:
     paths:
       - 'programs/monaco_protocol/**'
-    branches: [ develop ]
+    branches: [ develop-ci ]
 
 jobs:
   dev_build:
-    uses: BetDexLabs/protocol-private/.github/workflows/ci_build_.yml@develop
+    uses: BetDexLabs/protocol-private/.github/workflows/ci_build_.yml@develop-ci
     with:
       build_type: dev
       solana_version: ${{ vars.ORG_SOLANA_VERSION }}
@@ -18,7 +18,7 @@ jobs:
       region: ${{ secrets.ORG_AWS_REGION }}
 
   stable_build:
-    uses: BetDexLabs/protocol-private/.github/workflows/ci_build_.yml@develop
+    uses: BetDexLabs/protocol-private/.github/workflows/ci_build_.yml@develop-ci
     with:
       build_type: stable
       solana_version: ${{ vars.ORG_SOLANA_VERSION }}
@@ -29,7 +29,7 @@ jobs:
 
   cd_deploy:
     needs: dev_build
-    uses: BetDexLabs/protocol-private/.github/workflows/cd_deploy_.yml@develop
+    uses: BetDexLabs/protocol-private/.github/workflows/cd_deploy_.yml@develop-ci
     with:
       build: ${{ needs.dev_build.outputs.build_version }}
       environment: devnet

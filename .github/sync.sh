@@ -8,4 +8,4 @@ fi;
 git checkout ${BRANCH_NAME}
 git remote add protocol git@github.com:BetDexLabs/protocol.git
 git push protocol ${BRANCH_NAME}
-git checkout develop
+git checkout develop-ci
