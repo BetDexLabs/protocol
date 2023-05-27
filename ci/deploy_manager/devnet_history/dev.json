@@ -359,6 +359,18 @@
       "time": "14-03-23-15:47:43",
       "actioned_by": "eoin-betdex",
       "notes": "Auto-Deploy to Devnet"
+    },
+    {
+      "deployment_id": 31,
+      "new_version": {
+        "build": "0.9.0.dev.9cc222c1"
+      },
+      "previous_version": {
+        "build": "0.7.0-rc1.dev.5e9b5ea6"
+      },
+      "time": "26-05-23-15:52:00",
+      "actioned_by": "eoin-betdex",
+      "notes": "Auto-Deploy to Devnet"
     }
   ]
 }
