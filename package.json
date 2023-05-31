@@ -29,13 +29,15 @@
     "typescript": "^4.5.4"
   },
   "scripts": {
+    "sync": "$PWD/.github/sync.sh",
     "build": "cd npm-client && npm install && npm run build && cd - && cd npm-admin-client && npm install && npm run build && cd - && anchor build",
     "test": "anchor test",
     "runJestTests": "jest --silent --forceExit",
     "lint": "eslint --fix .",
     "format": "prettier --write \"**/*.{ts,js}\"",
     "prepare": "husky install",
-    "getAllMarkets": "ts-node admin/client.ts get_all_markets",
+    "getAll": "ts-node admin/client.ts getAll",
+    "getAllMarkets": "ts-node admin/client.ts getAllMarkets",
     "createMarket": "ts-node admin/client.ts create_market",
     "printMarket": "ts-node admin/client.ts print_market",
     "openMarket": "ts-node admin/client.ts openMarket",
@@ -47,7 +49,7 @@
     "unsuspendMarket": "ts-node admin/client.ts unsuspend_market",
     "voidMarket": "ts-node admin/client.ts void_market",
     "printMarketLiquidity": "ts-node admin/client.ts print_market_liquidity",
-    "getAllOrders": "ts-node admin/client.ts get_all_orders",
+    "getAllOrders": "ts-node admin/client.ts getAllOrders",
     "printOrder": "ts-node admin/client.ts print_order",
     "createOrder": "ts-node admin/client.ts create_order",
     "authoriseOperator": "ts-node admin/client.ts authorise_operator",
@@ -56,7 +58,7 @@
     "addPricesToLadder": "ts-node admin/client.ts addPricesToLadder",
     "getTokenLeaderboard": "ts-node admin/client.ts getTokenLeaderboard",
     "getMarketLeaderboards": "ts-node admin/client.ts getMarketLeaderboards",
-    "sync": "$PWD/.github/sync.sh"
+    "createProduct": "ts-node admin/client.ts createProduct"
   },
   "lint-staged": {
     "*.{js,ts}": [
