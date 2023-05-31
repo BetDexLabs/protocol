@@ -1,0 +1,67 @@
+name: CICD - Publish Admin NPM Package
+
+on:
+  workflow_dispatch:
+    inputs:
+      release:
+        type: choice
+        description: Release type
+        required: true
+        options:
+          - PATCH
+          - MINOR
+          - MAJOR
+          - DEV
+
+jobs:
+  publish:
+    runs-on: self-hosted
+
+    env:
+      VERSION_MANAGER: ./ci/version_manager
+      RELEASE_TYPE: ${{ github.event.inputs.release }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      RELEASE_BRANCH: "npm-release-${{ github.run_number }}"
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
+
+      - name: Set NPM Config
+        run: npm config set '//registry.npmjs.org/:_authToken' "${{ secrets.ORG_NPM_PUBLISH_TOKEN }}"
+
+      - name: Set Release Version
+        run: |
+          bash ${{ env.VERSION_MANAGER }}/bump_client_version.sh -v ${{ env.RELEASE_TYPE }} -c admin
+
+      - name: Publish Package
+        if: ${{ github.event.inputs.release != 'DEV' }}
+        run: |
+          cd npm-admin-client
+          npm install
+          npm run publishClient
+
+      - name: Publish Dev Package
+        if: ${{ github.event.inputs.release == 'DEV' }}
+        run: |
+          cd npm-admin-client
+          npm install
+          npm run publishDevClient
+
+      - name: Commit Log Changes
+        run: |
+          git config --global user.email "dexterbot@betdex.com"
+          git config --global user.name "Dexter"
+          git checkout -b ${{ env.RELEASE_BRANCH }}
+          git status
+          git add ./npm-admin-client/package.json
+          git commit --no-verify -m '${{ env.RELEASE_TYPE }} release of admin client'
+          git push --set-upstream origin ${{ env.RELEASE_BRANCH }}
+        env:
+          GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
+
+      - name: Create PR
+        run: |
+          gh pr create --title "[RELEASE] ${{ env.RELEASE_TYPE }} release of ADMIN client" --body "Update admin version please"
+        env:
+          GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}

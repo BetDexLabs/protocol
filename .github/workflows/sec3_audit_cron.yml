@@ -1,0 +1,19 @@
+name: Sec3 Audit Cron
+
+on:
+  schedule:
+    - cron: '0 12 * * 1-5'
+
+jobs:
+  sec-three-audit:
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
+
+      - name: Sec3 Audit
+        continue-on-error: true
+        uses: sec3dev/pro-action@v1
+        with:
+          sec3-token: ${{ secrets.ORG_SEC3_TOKEN }}
