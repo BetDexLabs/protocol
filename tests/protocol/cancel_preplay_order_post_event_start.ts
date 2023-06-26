@@ -47,6 +47,12 @@ describe("Security: Cancel Inplay Order Post Event Start", () => {
         10000,
       ],
     );
+
+    const marketMatchingPool =
+      await monaco.program.account.marketMatchingPool.fetch(
+        market.matchingPools[outcomeIndex][price].forOutcome,
+      );
+    assert.ok(marketMatchingPool.inplay);
   });
 
   it("success: partially matched order", async () => {
@@ -600,9 +606,9 @@ describe("Security: Cancel Inplay Order Post Event Start", () => {
           tokenProgram: TOKEN_PROGRAM_ID,
         })
         .rpc();
-      assert.fail("expected CancelationPurchaserMismatch");
+      assert.fail("expected CancelationMarketMismatch");
     } catch (e) {
-      assert.equal(e.error.errorCode.code, "CancelationPurchaserMismatch");
+      assert.equal(e.error.errorCode.code, "CancelationMarketMismatch");
     }
 
     // check the order wasn't cancelled
