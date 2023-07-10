@@ -281,7 +281,7 @@ describe("Protocol - Create Order", () => {
         marketEscrow: MarketAccounts.data.escrowPda,
         product: null,
       })
-      .rpc({ commitment: "confirmed" })
+      .rpc()
       .catch((e) => {
         assert.equal(e.error.errorCode.code, "ConstraintSeeds");
       });
@@ -468,7 +468,7 @@ describe("Protocol - Create Order", () => {
     );
     assert.equal(matchingPool.matchedAmount.toNumber(), 0);
     assert.equal(
-      matchingPool.purchaser.toBase58(),
+      matchingPool.payer.toBase58(),
       provider.wallet.publicKey.toBase58(),
     );
 
