@@ -7,8 +7,11 @@ import {
   TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
 import NodeWallet from "@coral-xyz/anchor/dist/cjs/nodewallet";
-import { findEscrowPda } from "./market_helpers";
-import { ClientResponse, ResponseFactory } from "@monaco-protocol/client";
+import {
+  ClientResponse,
+  ResponseFactory,
+  findEscrowPda,
+} from "@monaco-protocol/client";
 
 /**
  * Settle a market by setting the winningOutcomeIndex

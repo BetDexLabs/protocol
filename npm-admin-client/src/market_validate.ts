@@ -1,6 +1,5 @@
 import { Program } from "@coral-xyz/anchor";
 import { PublicKey } from "@solana/web3.js";
-import { getMarketOutcomesByMarket } from "./market_helpers";
 import {
   ValidateMarketResponse,
   ValidateMarketOutcomePriceLadder,
@@ -11,6 +10,7 @@ import {
   GetAccount,
   MarketOutcomeAccount,
   ResponseFactory,
+  getMarketOutcomesByMarket,
 } from "@monaco-protocol/client";
 
 /**
