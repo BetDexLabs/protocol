@@ -335,6 +335,42 @@
       "time": "19-09-22-18:46:06",
       "actioned_by": "eoin-betdex",
       "notes": "Auto-Deploy to Devnet"
+    },
+    {
+      "deployment_id": 29,
+      "new_version": {
+        "build": "0.6.0-rc1.dev.7a2ce2ee"
+      },
+      "previous_version": {
+        "build": "0.2.1.dev.e032a289"
+      },
+      "time": "27-01-23-12:39:40",
+      "actioned_by": "eoin-betdex",
+      "notes": "Auto-Deploy to Devnet"
+    },
+    {
+      "deployment_id": 30,
+      "new_version": {
+        "build": "0.7.0-rc1.dev.5e9b5ea6"
+      },
+      "previous_version": {
+        "build": "0.6.0-rc1.dev.7a2ce2ee"
+      },
+      "time": "14-03-23-15:47:43",
+      "actioned_by": "eoin-betdex",
+      "notes": "Auto-Deploy to Devnet"
+    },
+    {
+      "deployment_id": 31,
+      "new_version": {
+        "build": "0.9.0.dev.9cc222c1"
+      },
+      "previous_version": {
+        "build": "0.7.0-rc1.dev.5e9b5ea6"
+      },
+      "time": "26-05-23-15:52:00",
+      "actioned_by": "eoin-betdex",
+      "notes": "Auto-Deploy to Devnet"
     }
   ]
 }

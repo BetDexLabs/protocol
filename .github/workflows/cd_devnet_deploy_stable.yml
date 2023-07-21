@@ -1,0 +1,24 @@
+name: CICD - Stable Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      build:
+        type: string
+        required: true
+        description: "Build to deploy e.g. 0.1.0.stable.4c721b7b"
+
+jobs:
+  cd_deploy:
+    uses: BetDexLabs/protocol-private/.github/workflows/cd_deploy_.yml@develop-ci
+    with:
+      build: ${{ github.event.inputs.build }}
+      environment: devnet
+      note: "Manual deploy to stable"
+      solana_version: ${{ vars.ORG_SOLANA_VERSION_DEPLOY }}
+    secrets:
+      access_key_id: ${{ secrets.ORG_AWS_ACCESS_KEY_ID }}
+      access_key: ${{ secrets.ORG_AWS_SECRET_KEY }}
+      region: ${{ secrets.ORG_AWS_REGION }}
+      wallet_pass: ${{ secrets.ORG_DEV_WALLET_PASSPHRASE }}
+      gh_token: ${{ secrets.GITHUB_TOKEN }}

@@ -1,0 +1,24 @@
+Monaco Protocol:
+- programs/monaco_protocol/**/*
+
+Documentation:
+- any: ['**/*.md']
+
+Github Config:
+- '.github/**/*'
+- '.gitignore'
+
+CICD Tools:
+- 'ci/**/*'
+
+Security:
+- 'ci/security_manager/**/*'
+
+NPM Package:
+- 'npm-client/**/*'
+
+Admin NPM Package:
+- 'npm-admin-client/**/*'
+
+Tests:
+- 'tests/**/*'
