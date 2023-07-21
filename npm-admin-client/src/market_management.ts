@@ -1,12 +1,6 @@
 import { Program, AnchorProvider, BN } from "@coral-xyz/anchor";
 import { PublicKey } from "@solana/web3.js";
-import {
-  Operator,
-  TransactionResponse,
-  ClientResponse,
-  ResponseFactory,
-  EpochTimeStamp,
-} from "../types";
+import { Operator, TransactionResponse } from "../types";
 import { findAuthorisedOperatorsAccountPda } from "./operators";
 import {
   getOrCreateAssociatedTokenAccount,
@@ -14,6 +8,7 @@ import {
 } from "@solana/spl-token";
 import NodeWallet from "@coral-xyz/anchor/dist/cjs/nodewallet";
 import { findEscrowPda } from "./market_helpers";
+import { ClientResponse, ResponseFactory } from "@monaco-protocol/client";
 
 /**
  * Settle a market by setting the winningOutcomeIndex

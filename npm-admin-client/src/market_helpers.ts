@@ -2,19 +2,19 @@ import { Program, BorshAccountsCoder } from "@coral-xyz/anchor";
 import { PublicKey, MemcmpFilter } from "@solana/web3.js";
 import bs58 from "bs58";
 import { Buffer } from "buffer";
+import { AnchorProvider } from "@coral-xyz/anchor";
+import { Mint, getMint } from "@solana/spl-token";
 import {
   ClientResponse,
-  ResponseFactory,
   FindPdaResponse,
   GetAccount,
-  MarketAccount,
   GetPublicKeys,
+  MarketAccount,
   MarketOutcomeAccount,
   MarketOutcomeAccounts,
   MarketOutcomeTitlesResponse,
-} from "../types";
-import { AnchorProvider } from "@coral-xyz/anchor";
-import { Mint, getMint } from "@solana/spl-token";
+  ResponseFactory,
+} from "@monaco-protocol/client";
 
 export enum MarketType {
   EventResultFullTime = "EventResultFullTime",

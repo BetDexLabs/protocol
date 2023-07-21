@@ -5,10 +5,6 @@ import {
   Operator,
   CreateMarketResponse,
   CreateMarketWithOutcomesAndPriceLadderResponse,
-  ClientResponse,
-  ResponseFactory,
-  EpochTimeStamp,
-  MarketOrderBehaviour,
   MarketOrderBehaviourValue,
 } from "../types";
 import { findAuthorisedOperatorsAccountPda } from "./operators";
@@ -23,6 +19,11 @@ import {
 import { initialiseOutcomes } from "./market_outcome";
 import { batchAddPricesToAllOutcomePools } from "./market_outcome_prices";
 import { confirmTransaction } from "./utils";
+import {
+  ClientResponse,
+  MarketOrderBehaviour,
+  ResponseFactory,
+} from "@monaco-protocol/client";
 
 /**
  * For the given parameters:

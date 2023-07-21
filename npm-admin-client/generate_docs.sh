@@ -18,7 +18,6 @@ declare -a types=(
     "client"
     "default_price_ladder"
     "markets"
-    "market_outcomes"
     "operator"
 )
 

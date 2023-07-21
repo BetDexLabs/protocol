@@ -28,6 +28,9 @@
     "publishDevClient": "npm install && npm run build && npm publish --tag dev --access public && npm run clean",
     "publishRCClient": "npm install && npm run build && npm publish --tag rc --access public && npm run clean"
   },
+  "dependencies": {
+    "@monaco-protocol/client": "^7.1.0"
+  },
   "peerDependencies": {
     "bs58": "^4.0.1",
     "@coral-xyz/anchor": "~0.27.0",
