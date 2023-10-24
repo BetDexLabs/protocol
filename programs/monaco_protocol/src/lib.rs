@@ -12,6 +12,7 @@ use crate::state::order_account::Order;
 use crate::state::order_account::OrderData;
 use crate::state::trade_account::Trade;
 
+pub mod allocator;
 pub mod context;
 pub mod error;
 pub mod events;
@@ -29,6 +30,9 @@ declare_id!("monacoUXKtUi6vKsQwaLyxmXKSievfNWEcYXTgkbCih");
 pub mod monaco_protocol {
     use super::*;
     use crate::instructions::current_timestamp;
+
+    #[cfg(all(feature = "custom-heap", target_arch = "bpf"))]
+    use crate::allocator::A;
 
     pub const PRICE_SCALE: u8 = 3_u8;
 
@@ -194,13 +198,33 @@ pub mod monaco_protocol {
     }
 
     pub fn match_orders(mut ctx: Context<MatchOrders>) -> Result<()> {
+        #[cfg(all(feature = "custom-heap", target_arch = "bpf"))]
+            let mut before: usize;
+
+        #[cfg(all(feature = "custom-heap", target_arch = "bpf"))]
+        unsafe {
+            before = A.pos();
+        }
+
         verify_operator_authority(
             ctx.accounts.crank_operator.key,
             &ctx.accounts.authorised_operators,
         )?;
 
+        #[cfg(all(feature = "custom-heap", target_arch = "bpf"))]
+        unsafe {
+            msg!("after verify_operator_authority: {}", before - A.pos());
+            before = A.pos();
+        }
+
         let for_stake_unmatched = ctx.accounts.order_for.stake_unmatched;
         let against_stake_unmatched = ctx.accounts.order_against.stake_unmatched;
+
+        #[cfg(all(feature = "custom-heap", target_arch = "bpf"))]
+        unsafe {
+            msg!("after assigning stake unmatched: {}", before - A.pos());
+            before = A.pos();
+        }
 
         if for_stake_unmatched == 0 || against_stake_unmatched == 0 {
             ctx.accounts
@@ -212,7 +236,18 @@ pub mod monaco_protocol {
             return Ok(());
         }
 
+        #[cfg(all(feature = "custom-heap", target_arch = "bpf"))]
+        unsafe {
+            msg!("after trades already exist guard: {}", before - A.pos());
+            before = A.pos();
+        }
+
         instructions::matching::match_orders(&mut ctx)?;
+
+        #[cfg(all(feature = "custom-heap", target_arch = "bpf"))]
+        unsafe {
+            msg!("after inner match_orders: {}", before - A.pos());
+        }
 
         Ok(())
     }

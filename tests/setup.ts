@@ -10,29 +10,34 @@ import {
 } from "./util/test_util";
 
 module.exports = async function (_globalConfig, _projectConfig) {
-  const provider = anchor.AnchorProvider.local();
-  anchor.setProvider(provider);
-  const protocolProgram: anchor.Program<MonacoProtocol> =
-    anchor.workspace.MonacoProtocol;
-  const operatorPk: PublicKey = provider.wallet.publicKey;
-  await authoriseAdminOperator(operatorPk, protocolProgram, provider);
-  await authoriseOperator(
-    operatorPk,
-    protocolProgram,
-    provider,
-    OperatorType.MARKET,
-  );
-  await authoriseOperator(
-    operatorPk,
-    protocolProgram,
-    provider,
-    OperatorType.CRANK,
-  );
+  try {
+    const provider = anchor.AnchorProvider.local();
+    anchor.setProvider(provider);
+    const protocolProgram: anchor.Program<MonacoProtocol> =
+      anchor.workspace.MonacoProtocol;
+    const operatorPk: PublicKey = provider.wallet.publicKey;
+    await authoriseAdminOperator(operatorPk, protocolProgram, provider);
+    await authoriseOperator(
+      operatorPk,
+      protocolProgram,
+      provider,
+      OperatorType.MARKET,
+    );
+    await authoriseOperator(
+      operatorPk,
+      protocolProgram,
+      provider,
+      OperatorType.CRANK,
+    );
 
-  await createProtocolProduct(provider);
+    await createProtocolProduct(provider);
 
-  await getOrCreateMarketType(
-    protocolProgram as anchor.Program,
-    "EventResultWinner",
-  );
+    await getOrCreateMarketType(
+      protocolProgram as anchor.Program,
+      "EventResultWinner",
+    );
+  } catch (err) {
+    console.error(err);
+    throw err;
+  }
 };
