@@ -199,7 +199,7 @@ pub mod monaco_protocol {
 
     pub fn match_orders(mut ctx: Context<MatchOrders>) -> Result<()> {
         #[cfg(all(feature = "custom-heap", target_arch = "bpf"))]
-            let mut before: usize;
+        let mut before: usize;
 
         #[cfg(all(feature = "custom-heap", target_arch = "bpf"))]
         unsafe {
