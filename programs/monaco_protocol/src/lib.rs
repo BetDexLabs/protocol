@@ -213,8 +213,13 @@ pub mod monaco_protocol {
 
         #[cfg(all(feature = "custom-heap", target_arch = "bpf"))]
         unsafe {
-            msg!("after verify_operator_authority: {}", before - A.pos());
-            before = A.pos();
+            let after = A.pos();
+            msg!(
+                "after verify_operator_authority: {} {}",
+                before - after,
+                after
+            );
+            before = after;
         }
 
         let for_stake_unmatched = ctx.accounts.order_for.stake_unmatched;
@@ -222,8 +227,13 @@ pub mod monaco_protocol {
 
         #[cfg(all(feature = "custom-heap", target_arch = "bpf"))]
         unsafe {
-            msg!("after assigning stake unmatched: {}", before - A.pos());
-            before = A.pos();
+            let after = A.pos();
+            msg!(
+                "after assigning stake unmatched: {} {}",
+                before - after,
+                after
+            );
+            before = after;
         }
 
         if for_stake_unmatched == 0 || against_stake_unmatched == 0 {
@@ -238,15 +248,22 @@ pub mod monaco_protocol {
 
         #[cfg(all(feature = "custom-heap", target_arch = "bpf"))]
         unsafe {
-            msg!("after trades already exist guard: {}", before - A.pos());
-            before = A.pos();
+            let after = A.pos();
+            msg!(
+                "after trades already exist guard: {} {}",
+                before - after,
+                after
+            );
+            before = after;
         }
 
         instructions::matching::match_orders(&mut ctx)?;
 
         #[cfg(all(feature = "custom-heap", target_arch = "bpf"))]
         unsafe {
-            msg!("after inner match_orders: {}", before - A.pos());
+            let after = A.pos();
+            msg!("after inner match_orders: {} {}", before - after, after);
+            before = after;
         }
 
         Ok(())

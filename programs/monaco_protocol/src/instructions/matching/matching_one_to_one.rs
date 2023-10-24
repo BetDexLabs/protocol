@@ -34,8 +34,9 @@ pub fn match_orders(ctx: &mut Context<MatchOrders>) -> Result<()> {
 
     #[cfg(all(feature = "custom-heap", target_arch = "bpf"))]
     unsafe {
-        msg!("after validate market: {}", before - A.pos());
-        before = A.pos();
+        let after = A.pos();
+        msg!("after validate market: {} {}", before - after, after);
+        before = after;
     }
 
     let now = current_timestamp();
@@ -46,8 +47,13 @@ pub fn match_orders(ctx: &mut Context<MatchOrders>) -> Result<()> {
     );
     #[cfg(all(feature = "custom-heap", target_arch = "bpf"))]
     unsafe {
-        msg!("after validate market not locked: {}", before - A.pos());
-        before = A.pos();
+        let after = A.pos();
+        msg!(
+            "after validate market not locked: {} {}",
+            before - after,
+            after
+        );
+        before = after;
     }
     // validate orders market-outcome-price
     require!(
@@ -56,8 +62,9 @@ pub fn match_orders(ctx: &mut Context<MatchOrders>) -> Result<()> {
     );
     #[cfg(all(feature = "custom-heap", target_arch = "bpf"))]
     unsafe {
-        msg!("after validate outcomes: {}", before - A.pos());
-        before = A.pos();
+        let after = A.pos();
+        msg!("after validate outcomes: {} {}", before - after, after);
+        before = after;
     }
     require!(
         order_for.expected_price <= order_against.expected_price,
@@ -65,16 +72,18 @@ pub fn match_orders(ctx: &mut Context<MatchOrders>) -> Result<()> {
     );
     #[cfg(all(feature = "custom-heap", target_arch = "bpf"))]
     unsafe {
-        msg!("after validate prices: {}", before - A.pos());
-        before = A.pos();
+        let after = A.pos();
+        msg!("after validate prices: {} {}", before - after, after);
+        before = after;
     }
     // validate that status is open or matched (for partial matches)
     require!(!order_for.is_completed(), CoreError::StatusClosed);
     require!(!order_against.is_completed(), CoreError::StatusClosed);
     #[cfg(all(feature = "custom-heap", target_arch = "bpf"))]
     unsafe {
-        msg!("after validate order status: {}", before - A.pos());
-        before = A.pos();
+        let after = A.pos();
+        msg!("after validate order status: {} {}", before - after, after);
+        before = after;
     }
     // validate that both orders are not within their inplay delay
     require!(
@@ -84,8 +93,9 @@ pub fn match_orders(ctx: &mut Context<MatchOrders>) -> Result<()> {
     );
     #[cfg(all(feature = "custom-heap", target_arch = "bpf"))]
     unsafe {
-        msg!("after validate inplay delay: {}", before - A.pos());
-        before = A.pos();
+        let after = A.pos();
+        msg!("after validate inplay delay: {} {}", before - after, after);
+        before = after;
     }
     let selected_price = if order_for.creation_timestamp < order_against.creation_timestamp {
         order_for.expected_price
@@ -94,8 +104,9 @@ pub fn match_orders(ctx: &mut Context<MatchOrders>) -> Result<()> {
     };
     #[cfg(all(feature = "custom-heap", target_arch = "bpf"))]
     unsafe {
-        msg!("after select price: {}", before - A.pos());
-        before = A.pos();
+        let after = A.pos();
+        msg!("after select price: {} {}", before - after, after);
+        before = after;
     }
     // determine the matchable stake
     let stake_matched = order_for.stake_unmatched.min(order_against.stake_unmatched);
@@ -107,8 +118,13 @@ pub fn match_orders(ctx: &mut Context<MatchOrders>) -> Result<()> {
 
     #[cfg(all(feature = "custom-heap", target_arch = "bpf"))]
     unsafe {
-        msg!("after set up market positions: {}", before - A.pos());
-        before = A.pos();
+        let after = A.pos();
+        msg!(
+            "after set up market positions: {} {}",
+            before - after,
+            after
+        );
+        before = after;
     }
 
     let change_in_exposure_refund_against;
@@ -128,8 +144,9 @@ pub fn match_orders(ctx: &mut Context<MatchOrders>) -> Result<()> {
         }
         #[cfg(all(feature = "custom-heap", target_arch = "bpf"))]
         unsafe {
-            msg!("after 1 a<f: {}", before - A.pos());
-            before = A.pos();
+            let after = A.pos();
+            msg!("after 1 a<f: {} {}", before - after, after);
+            before = after;
         }
         // 2. match for
         // -----------------------------
@@ -144,8 +161,9 @@ pub fn match_orders(ctx: &mut Context<MatchOrders>) -> Result<()> {
         }
         #[cfg(all(feature = "custom-heap", target_arch = "bpf"))]
         unsafe {
-            msg!("after 2 a<f: {}", before - A.pos());
-            before = A.pos();
+            let after = A.pos();
+            msg!("after 2 a<f: {} {}", before - after, after);
+            before = after;
         }
     } else {
         // 1. match for
@@ -161,8 +179,9 @@ pub fn match_orders(ctx: &mut Context<MatchOrders>) -> Result<()> {
         }
         #[cfg(all(feature = "custom-heap", target_arch = "bpf"))]
         unsafe {
-            msg!("after 1 f<a: {}", before - A.pos());
-            before = A.pos();
+            let after = A.pos();
+            msg!("after 1 f<a: {} {}", before - after, after);
+            before = after;
         }
         // 2. match against
         // -----------------------------
@@ -177,8 +196,9 @@ pub fn match_orders(ctx: &mut Context<MatchOrders>) -> Result<()> {
         }
         #[cfg(all(feature = "custom-heap", target_arch = "bpf"))]
         unsafe {
-            msg!("after 2 f<a: {}", before - A.pos());
-            before = A.pos();
+            let after = A.pos();
+            msg!("after 2 f<a: {} {}", before - after, after);
+            before = after;
         }
     };
 
@@ -191,8 +211,13 @@ pub fn match_orders(ctx: &mut Context<MatchOrders>) -> Result<()> {
     )?;
     #[cfg(all(feature = "custom-heap", target_arch = "bpf"))]
     unsafe {
-        msg!("after update product contribs: {}", before - A.pos());
-        before = A.pos();
+        let after = A.pos();
+        msg!(
+            "after update product contribs: {} {}",
+            before - after,
+            after
+        );
+        before = after;
     }
     // 3. market update
     // -----------------------------
@@ -207,8 +232,9 @@ pub fn match_orders(ctx: &mut Context<MatchOrders>) -> Result<()> {
     )?;
     #[cfg(all(feature = "custom-heap", target_arch = "bpf"))]
     unsafe {
-        msg!("after 3 market update: {}", before - A.pos());
-        before = A.pos();
+        let after = A.pos();
+        msg!("after 3 market update: {} {}", before - after, after);
+        before = after;
     }
 
     // 4. if any refunds are due to change in exposure, transfer them
@@ -220,8 +246,9 @@ pub fn match_orders(ctx: &mut Context<MatchOrders>) -> Result<()> {
     }
     #[cfg(all(feature = "custom-heap", target_arch = "bpf"))]
     unsafe {
-        msg!("after 4 matching refunds: {}", before - A.pos());
-        before = A.pos();
+        let after = A.pos();
+        msg!("after 4 matching refunds: {} {}", before - after, after);
+        before = after;
     }
 
     // 5. Initialize the trade accounts
@@ -237,14 +264,16 @@ pub fn match_orders(ctx: &mut Context<MatchOrders>) -> Result<()> {
     );
     #[cfg(all(feature = "custom-heap", target_arch = "bpf"))]
     unsafe {
-        msg!("after trade init: {}", before - A.pos());
-        before = A.pos();
+        let after = A.pos();
+        msg!("after trade init: {} {}", before - after, after);
+        before = after;
     }
     ctx.accounts.market.increment_unclosed_accounts_count()?;
     #[cfg(all(feature = "custom-heap", target_arch = "bpf"))]
     unsafe {
-        msg!("after account # bump: {}", before - A.pos());
-        before = A.pos();
+        let after = A.pos();
+        msg!("after account # bump: {} {}", before - after, after);
+        before = after;
     }
     initialize_trade(
         &mut ctx.accounts.trade_for,
@@ -257,14 +286,16 @@ pub fn match_orders(ctx: &mut Context<MatchOrders>) -> Result<()> {
     );
     #[cfg(all(feature = "custom-heap", target_arch = "bpf"))]
     unsafe {
-        msg!("after trade init: {}", before - A.pos());
-        before = A.pos();
+        let after = A.pos();
+        msg!("after trade init: {} {}", before - after, after);
+        before = after;
     }
     ctx.accounts.market.increment_unclosed_accounts_count()?;
     #[cfg(all(feature = "custom-heap", target_arch = "bpf"))]
     unsafe {
-        msg!("after account # bump: {}", before - A.pos());
-        before = A.pos();
+        let after = A.pos();
+        msg!("after account # bump: {} {}", before - after, after);
+        before = after;
     }
     emit!(TradeEvent {
         amount: stake_matched,
@@ -273,7 +304,8 @@ pub fn match_orders(ctx: &mut Context<MatchOrders>) -> Result<()> {
     });
     #[cfg(all(feature = "custom-heap", target_arch = "bpf"))]
     unsafe {
-        msg!("after trade event emit: {}", before - A.pos());
+        let after = A.pos();
+        msg!("after trade event emit: {} {}", before - after, after);
     }
 
     Ok(())
