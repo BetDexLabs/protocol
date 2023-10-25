@@ -1,4 +1,5 @@
 use solana_program::entrypoint::{HEAP_LENGTH, HEAP_START_ADDRESS};
+use solana_program::msg;
 use std::alloc::Layout;
 use std::mem::size_of;
 use std::ptr::null_mut;
@@ -10,6 +11,7 @@ pub struct BumpAllocator {
 
 impl BumpAllocator {
     const RESERVED_MEM: usize = 1 * size_of::<*mut u8>();
+    pub const HEAP_START: usize = (HEAP_START_ADDRESS as usize) + HEAP_LENGTH;
 
     /// Return heap position as of this call
     pub unsafe fn pos(&self) -> usize {
@@ -22,6 +24,12 @@ impl BumpAllocator {
     pub unsafe fn move_cursor(&self, pos: usize) {
         let pos_ptr = self.start as *mut usize;
         *pos_ptr = pos;
+    }
+
+    pub unsafe fn print_usage(&self) -> usize {
+        let curr = self.pos();
+        msg!("Heap usage: {} bytes", BumpAllocator::HEAP_START - curr);
+        curr
     }
 }
 unsafe impl std::alloc::GlobalAlloc for BumpAllocator {

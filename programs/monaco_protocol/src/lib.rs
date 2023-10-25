@@ -203,7 +203,7 @@ pub mod monaco_protocol {
 
         #[cfg(all(feature = "custom-heap", target_arch = "bpf"))]
         unsafe {
-            before = A.pos();
+            before = A.print_usage();
         }
 
         verify_operator_authority(
@@ -213,7 +213,7 @@ pub mod monaco_protocol {
 
         #[cfg(all(feature = "custom-heap", target_arch = "bpf"))]
         unsafe {
-            let after = A.pos();
+            let after = A.print_usage();
             msg!(
                 "after verify_operator_authority: {} {}",
                 before - after,
@@ -227,7 +227,7 @@ pub mod monaco_protocol {
 
         #[cfg(all(feature = "custom-heap", target_arch = "bpf"))]
         unsafe {
-            let after = A.pos();
+            let after = A.print_usage();
             msg!(
                 "after assigning stake unmatched: {} {}",
                 before - after,
@@ -248,7 +248,7 @@ pub mod monaco_protocol {
 
         #[cfg(all(feature = "custom-heap", target_arch = "bpf"))]
         unsafe {
-            let after = A.pos();
+            let after = A.print_usage();
             msg!(
                 "after trades already exist guard: {} {}",
                 before - after,
@@ -261,9 +261,8 @@ pub mod monaco_protocol {
 
         #[cfg(all(feature = "custom-heap", target_arch = "bpf"))]
         unsafe {
-            let after = A.pos();
-            msg!("after inner match_orders: {} {}", before - after, after);
-            before = after;
+            let after = A.print_usage();
+            msg!("after inner match_orders: {}", before - after);
         }
 
         Ok(())

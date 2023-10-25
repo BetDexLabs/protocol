@@ -322,7 +322,7 @@ pub struct MatchOrders<'info> {
         payer = crank_operator,
         space = Trade::SIZE,
     )]
-    pub trade_against: Box<Account<'info, Trade>>,
+    pub trade_against: Account<'info, Trade>,
 
     #[account(
         mut,
