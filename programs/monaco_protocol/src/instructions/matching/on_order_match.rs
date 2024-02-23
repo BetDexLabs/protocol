@@ -2,7 +2,7 @@ use anchor_lang::prelude::*;
 
 use crate::instructions::market_position::update_product_commission_contributions;
 use crate::instructions::matching::create_trade::create_trade;
-use crate::instructions::{calculate_risk_from_stake, current_timestamp, market_position, order};
+use crate::instructions::{calculate_risk_from_stake, current_timestamp, market_position};
 
 use crate::error::CoreError;
 use crate::events::trade::TradeEvent;
@@ -36,7 +36,7 @@ pub fn on_order_match(
             let stake = maker_order.stake_unmatched.min(taker_order.stake);
 
             // update order
-            order::match_order_internal(maker_order, stake, taker_order.price)?;
+            maker_order.match_stake_unmatched(stake, taker_order.price)?;
             let refund = market_position::update_on_order_match(
                 market_position,
                 maker_order,
