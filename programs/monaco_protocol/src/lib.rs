@@ -294,15 +294,11 @@ pub mod monaco_protocol {
     pub fn process_order_match(
         ctx: Context<ProcessOrderMatch>,
         maker_order_trade_seed: u16,
-        taker_order_trade_seed: u16,
     ) -> Result<()> {
         let stake_unmatched = ctx.accounts.maker_order.stake_unmatched;
 
         // if there's nothing to match close the trades
         if stake_unmatched == 0 {
-            ctx.accounts
-                .taker_order_trade
-                .close(ctx.accounts.crank_operator.to_account_info())?;
             ctx.accounts
                 .maker_order_trade
                 .close(ctx.accounts.crank_operator.to_account_info())?;
@@ -318,7 +314,6 @@ pub mod monaco_protocol {
                 &mut ctx.accounts.maker_order,
                 &mut ctx.accounts.market_position,
                 &mut ctx.accounts.maker_order_trade,
-                &mut ctx.accounts.taker_order_trade,
                 &ctx.accounts.crank_operator.key(),
             )?;
 
@@ -359,8 +354,8 @@ pub mod monaco_protocol {
 
         if for_stake_unmatched == 0
             || against_stake_unmatched == 0
-            || liquidity_for.liquidity < against_stake_unmatched
-            || liquidity_against.liquidity < for_stake_unmatched
+            || liquidity_for.map_or(0_u64, |x| x.liquidity) < against_stake_unmatched
+            || liquidity_against.map_or(0_u64, |x| x.liquidity) < for_stake_unmatched
         {
             ctx.accounts
                 .trade_for

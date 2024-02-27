@@ -487,18 +487,28 @@ pub struct AuthoriseOperator<'info> {
     pub system_program: Program<'info, System>,
 }
 
-fn taker_order_pk(market_matching_queue: &Account<MarketMatchingQueue>) -> Result<Pubkey> {
-    Ok(market_matching_queue
+// TODO do we need a separate processing for makers and takers?
+fn matching_order_pk(
+    market_matching_queue: &Account<MarketMatchingQueue>,
+    market_matching_pool: &Account<MarketMatchingPool>,
+) -> Result<Pubkey> {
+    let order_match = market_matching_queue
         .matches
         .peek()
-        .ok_or(CoreError::MatchingQueueIsEmpty)?
-        .pk)
+        .ok_or(CoreError::MatchingQueueIsEmpty)?;
+    if order_match.taker {
+        Ok(order_match.pk.ok_or(CoreError::MatchingQueueIsEmpty)?)
+    } else {
+        Ok(*market_matching_pool
+            .orders
+            .peek(0)
+            .ok_or(CoreError::MatchingQueueIsEmpty)?)
+    }
 }
 
 #[derive(Accounts)]
 #[instruction(
     maker_order_trade_seed: u16,
-    taker_order_trade_seed: u16,
 )]
 pub struct ProcessOrderMatch<'info> {
     #[account(mut)]
@@ -525,8 +535,7 @@ pub struct ProcessOrderMatch<'info> {
     #[account(
         mut,
         has_one = market @ CoreError::MatchingMarketMismatch,
-        constraint = *market_matching_pool.orders.peek(0)
-            .ok_or(CoreError::MatchingQueueIsEmpty)? == maker_order.key() @ CoreError::MatchingMakerOrderMismatch,
+        constraint = matching_order_pk(&market_matching_queue, &market_matching_pool)? == maker_order.key() @ CoreError::MatchingMakerOrderMismatch,
     )]
     pub maker_order: Account<'info, Order>,
     #[account(
@@ -553,17 +562,6 @@ pub struct ProcessOrderMatch<'info> {
         space = Trade::SIZE,
     )]
     pub maker_order_trade: Box<Account<'info, Trade>>,
-    #[account(
-        init_if_needed,
-        seeds = [
-            taker_order_pk(&market_matching_queue)?.as_ref(),
-            taker_order_trade_seed.to_string().as_ref(),
-        ],
-        bump,
-        payer = crank_operator,
-        space = Trade::SIZE,
-    )]
-    pub taker_order_trade: Box<Account<'info, Trade>>,
 
     #[account(mut)]
     pub crank_operator: Signer<'info>,

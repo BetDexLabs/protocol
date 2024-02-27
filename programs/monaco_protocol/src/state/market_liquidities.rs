@@ -21,34 +21,26 @@ impl MarketLiquidities {
         + vec_size(MarketOutcomePriceLiquidity::SIZE, MarketLiquidities::LIQUIDITIES_VEC_LENGTH) // for
         + vec_size(MarketOutcomePriceLiquidity::SIZE, MarketLiquidities::LIQUIDITIES_VEC_LENGTH); // against
 
-    pub fn get_liquidity_for(&self, outcome: u16, price: f64) -> MarketOutcomePriceLiquidity {
-        match self
-            .liquidities_for
+    pub fn get_liquidity_for(
+        &self,
+        outcome: u16,
+        price: f64,
+    ) -> Option<&MarketOutcomePriceLiquidity> {
+        self.liquidities_for
             .binary_search_by(Self::sorter_for(outcome, price))
-        {
-            Ok(index) => self.liquidities_for[index],
-            Err(_) => MarketOutcomePriceLiquidity {
-                outcome,
-                price,
-                liquidity: 0,
-                cross: false,
-            },
-        }
+            .ok()
+            .map(|index| &self.liquidities_for[index])
     }
 
-    pub fn get_liquidity_against(&self, outcome: u16, price: f64) -> MarketOutcomePriceLiquidity {
-        match self
-            .liquidities_against
+    pub fn get_liquidity_against(
+        &self,
+        outcome: u16,
+        price: f64,
+    ) -> Option<&MarketOutcomePriceLiquidity> {
+        self.liquidities_against
             .binary_search_by(Self::sorter_against(outcome, price))
-        {
-            Ok(index) => self.liquidities_against[index],
-            Err(_) => MarketOutcomePriceLiquidity {
-                outcome,
-                price,
-                liquidity: 0,
-                cross: false,
-            },
-        }
+            .ok()
+            .map(|index| &self.liquidities_against[index])
     }
 
     pub fn add_liquidity_for(&mut self, outcome: u16, price: f64, liquidity: u64) -> Result<()> {
@@ -99,7 +91,7 @@ impl MarketLiquidities {
                     outcome,
                     price,
                     liquidity,
-                    cross: false,
+                    sources: vec![],
                 },
             ),
         }
@@ -197,12 +189,12 @@ impl MarketLiquidities {
     }
 }
 
-#[derive(AnchorSerialize, AnchorDeserialize, Clone, Copy, Debug, Default, PartialEq)]
+#[derive(AnchorSerialize, AnchorDeserialize, Clone, Debug, Default, PartialEq)]
 pub struct MarketOutcomePriceLiquidity {
     pub outcome: u16,
     pub price: f64,
     pub liquidity: u64,
-    pub cross: bool,
+    pub sources: Vec<(u16, f64)>,
 }
 
 impl MarketOutcomePriceLiquidity {
@@ -263,25 +255,25 @@ mod total_exposure_tests {
                 outcome: 0,
                 price: 2.111,
                 liquidity: 1001,
-                cross: false,
+                sources: vec![],
             },
             MarketOutcomePriceLiquidity {
                 outcome: 0,
                 price: 2.112,
                 liquidity: 499,
-                cross: false,
+                sources: vec![],
             },
             MarketOutcomePriceLiquidity {
                 outcome: 1,
                 price: 2.111,
                 liquidity: 2001,
-                cross: false,
+                sources: vec![],
             },
             MarketOutcomePriceLiquidity {
                 outcome: 2,
                 price: 2.111,
                 liquidity: 3001,
-                cross: false,
+                sources: vec![],
             },
         ];
         assert_eq!(expected_for, market_liquidities.liquidities_for);
@@ -290,25 +282,25 @@ mod total_exposure_tests {
                 outcome: 2,
                 price: 2.111,
                 liquidity: 3001,
-                cross: false,
+                sources: vec![],
             },
             MarketOutcomePriceLiquidity {
                 outcome: 1,
                 price: 2.111,
                 liquidity: 2001,
-                cross: false,
+                sources: vec![],
             },
             MarketOutcomePriceLiquidity {
                 outcome: 0,
                 price: 2.112,
                 liquidity: 499,
-                cross: false,
+                sources: vec![],
             },
             MarketOutcomePriceLiquidity {
                 outcome: 0,
                 price: 2.111,
                 liquidity: 1001,
-                cross: false,
+                sources: vec![],
             },
         ];
         assert_eq!(expected_against, market_liquidities.liquidities_against);
@@ -323,19 +315,19 @@ mod total_exposure_tests {
                     outcome: 0,
                     price: 2.111,
                     liquidity: 1001,
-                    cross: false,
+                    sources: vec![],
                 },
                 MarketOutcomePriceLiquidity {
                     outcome: 1,
                     price: 2.111,
                     liquidity: 2001,
-                    cross: false,
+                    sources: vec![],
                 },
                 MarketOutcomePriceLiquidity {
                     outcome: 2,
                     price: 2.111,
                     liquidity: 3001,
-                    cross: false,
+                    sources: vec![],
                 },
             ],
             liquidities_against: vec![
@@ -343,19 +335,19 @@ mod total_exposure_tests {
                     outcome: 2,
                     price: 2.111,
                     liquidity: 3001,
-                    cross: false,
+                    sources: vec![],
                 },
                 MarketOutcomePriceLiquidity {
                     outcome: 1,
                     price: 2.111,
                     liquidity: 2001,
-                    cross: false,
+                    sources: vec![],
                 },
                 MarketOutcomePriceLiquidity {
                     outcome: 0,
                     price: 2.111,
                     liquidity: 1001,
-                    cross: false,
+                    sources: vec![],
                 },
             ],
         };
@@ -385,19 +377,19 @@ mod total_exposure_tests {
                 outcome: 0,
                 price: 2.111,
                 liquidity: 801,
-                cross: false,
+                sources: vec![],
             },
             MarketOutcomePriceLiquidity {
                 outcome: 1,
                 price: 2.111,
                 liquidity: 1801,
-                cross: false,
+                sources: vec![],
             },
             MarketOutcomePriceLiquidity {
                 outcome: 2,
                 price: 2.111,
                 liquidity: 2801,
-                cross: false,
+                sources: vec![],
             },
         ];
         assert_eq!(expected_for, market_liquidities.liquidities_for);
@@ -406,19 +398,19 @@ mod total_exposure_tests {
                 outcome: 2,
                 price: 2.111,
                 liquidity: 2801,
-                cross: false,
+                sources: vec![],
             },
             MarketOutcomePriceLiquidity {
                 outcome: 1,
                 price: 2.111,
                 liquidity: 1801,
-                cross: false,
+                sources: vec![],
             },
             MarketOutcomePriceLiquidity {
                 outcome: 0,
                 price: 2.111,
                 liquidity: 801,
-                cross: false,
+                sources: vec![],
             },
         ];
         assert_eq!(expected_against, market_liquidities.liquidities_against);
@@ -433,25 +425,25 @@ mod total_exposure_tests {
                     outcome: 0,
                     price: 2.30,
                     liquidity: 1001,
-                    cross: false,
+                    sources: vec![],
                 },
                 MarketOutcomePriceLiquidity {
                     outcome: 0,
                     price: 2.31,
                     liquidity: 1002,
-                    cross: false,
+                    sources: vec![],
                 },
                 MarketOutcomePriceLiquidity {
                     outcome: 0,
                     price: 2.32,
                     liquidity: 1003,
-                    cross: false,
+                    sources: vec![],
                 },
                 MarketOutcomePriceLiquidity {
                     outcome: 0,
                     price: 2.33,
                     liquidity: 1004,
-                    cross: false,
+                    sources: vec![],
                 },
             ],
             liquidities_against: vec![],
@@ -459,12 +451,18 @@ mod total_exposure_tests {
 
         assert_eq!(
             1002,
-            market_liquidities.get_liquidity_for(0, 2.31).liquidity
+            market_liquidities
+                .get_liquidity_for(0, 2.31)
+                .unwrap()
+                .liquidity
         );
-        assert_eq!(0, market_liquidities.get_liquidity_for(0, 2.315).liquidity);
+        assert_eq!(None, market_liquidities.get_liquidity_for(0, 2.315));
         assert_eq!(
             1003,
-            market_liquidities.get_liquidity_for(0, 2.32).liquidity
+            market_liquidities
+                .get_liquidity_for(0, 2.32)
+                .unwrap()
+                .liquidity
         );
     }
 
@@ -478,40 +476,43 @@ mod total_exposure_tests {
                     outcome: 0,
                     price: 2.33,
                     liquidity: 1004,
-                    cross: false,
+                    sources: vec![],
                 },
                 MarketOutcomePriceLiquidity {
                     outcome: 0,
                     price: 2.32,
                     liquidity: 1003,
-                    cross: false,
+                    sources: vec![],
                 },
                 MarketOutcomePriceLiquidity {
                     outcome: 0,
                     price: 2.31,
                     liquidity: 1002,
-                    cross: false,
+                    sources: vec![],
                 },
                 MarketOutcomePriceLiquidity {
                     outcome: 0,
                     price: 2.30,
                     liquidity: 1001,
-                    cross: false,
+                    sources: vec![],
                 },
             ],
         };
 
         assert_eq!(
             1002,
-            market_liquidities.get_liquidity_against(0, 2.31).liquidity
+            market_liquidities
+                .get_liquidity_against(0, 2.31)
+                .unwrap()
+                .liquidity
         );
-        assert_eq!(
-            0,
-            market_liquidities.get_liquidity_against(0, 2.315).liquidity
-        );
+        assert_eq!(None, market_liquidities.get_liquidity_against(0, 2.315));
         assert_eq!(
             1003,
-            market_liquidities.get_liquidity_against(0, 2.32).liquidity
+            market_liquidities
+                .get_liquidity_against(0, 2.32)
+                .unwrap()
+                .liquidity
         );
     }
 }
