@@ -112,12 +112,11 @@ Type: {front: [number][44], len: [number][44], items: [Array][47]<[MarketMatchin
 
 ## MarketMatchingQueueOrderMatch
 
-Type: {pk: PublicKey, purchaser: PublicKey, forOutcome: [boolean][46], outcomeIndex: [number][44], price: [number][44], stake: [number][44]}
+Type: {pk: PublicKey, forOutcome: [boolean][46], outcomeIndex: [number][44], price: [number][44], stake: [number][44]}
 
 ### Properties
 
 *   `pk` **PublicKey**&#x20;
-*   `purchaser` **PublicKey**&#x20;
 *   `forOutcome` **[boolean][46]**&#x20;
 *   `outcomeIndex` **[number][44]**&#x20;
 *   `price` **[number][44]**&#x20;

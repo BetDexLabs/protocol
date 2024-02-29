@@ -65,7 +65,6 @@ export type MarketMatchingQueue = {
 
 export type MarketMatchingQueueOrderMatch = {
   pk: PublicKey;
-  purchaser: PublicKey;
 
   forOutcome: boolean;
   outcomeIndex: number;
