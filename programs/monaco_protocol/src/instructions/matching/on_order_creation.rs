@@ -72,7 +72,6 @@ pub fn on_order_creation(
                 .matches
                 .enqueue(OrderMatch::taker(
                     *order_pk,
-                    order.purchaser.key(),
                     order.for_outcome,
                     order.market_outcome_index,
                     liquidity.price,
@@ -160,7 +159,6 @@ pub fn on_order_creation(
                 .matches
                 .enqueue(OrderMatch::taker(
                     *order_pk,
-                    order.purchaser.key(),
                     order.for_outcome,
                     order.market_outcome_index,
                     liquidity.price,
@@ -285,11 +283,11 @@ mod test {
         assert!(on_order_creation_result.is_ok());
 
         assert_eq!(
-            vec!((1.7, 10), (1.75, 10)),
+            vec!((1.6, 10), (1.65, 10), (1.7, 10), (1.75, 10)),
             liquidities(&market_liquidities.liquidities_for)
         );
         assert_eq!(
-            Vec::<(f64, u64)>::new(),
+            vec!((1.8, 20)),
             liquidities(&market_liquidities.liquidities_against)
         );
         assert_eq!(
@@ -310,16 +308,12 @@ mod test {
                 (1.5, 10),
                 (1.55, 10),
                 (1.55, 10),
-                (1.6, 10),
-                (1.6, 10),
-                (1.65, 10),
-                (1.65, 10)
             ),
             matches(&market_matching_queue.matches) // vec max length
         );
 
-        assert_eq!(0_u64, order.stake_unmatched);
-        assert_eq!(140_u64, order.payout);
+        assert_eq!(20_u64, order.stake_unmatched);
+        assert_eq!(108_u64, order.payout);
     }
 
     #[test]

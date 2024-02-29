@@ -223,8 +223,6 @@ export class Monaco {
 
     return {
       pk: matchesHead.pk,
-      purchaser: matchesHead.purchaser,
-      taker: matchesHead.taker,
       forOutcome: matchesHead.forOutcome,
       outcomeIndex: matchesHead.outcomeIndex,
       price: matchesHead.price,

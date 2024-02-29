@@ -108,9 +108,7 @@ impl MatchingQueue {
 #[derive(AnchorSerialize, AnchorDeserialize, Clone, Copy, Debug, Default)]
 pub struct OrderMatch {
     pub pk: Option<Pubkey>,
-    pub purchaser: Option<Pubkey>,
 
-    pub taker: bool,
     pub for_outcome: bool,
     pub outcome_index: u16,
     pub price: f64,
@@ -118,15 +116,14 @@ pub struct OrderMatch {
 }
 
 impl OrderMatch {
-    pub const SIZE: usize = option_size(PUB_KEY_SIZE) * 2 +  // pk, purchaser
-        BOOL_SIZE * 2 + // taker, for_outcome
+    pub const SIZE: usize = option_size(PUB_KEY_SIZE) +  // pk
+        BOOL_SIZE + // for_outcome
         U16_SIZE + // outcome_index
         F64_SIZE + // price
         U64_SIZE; // stake
 
     pub fn taker(
         pk: Pubkey,
-        purchaser: Pubkey,
         for_outcome: bool,
         outcome_index: u16,
         price: f64,
@@ -134,8 +131,6 @@ impl OrderMatch {
     ) -> Self {
         OrderMatch {
             pk: Option::Some(pk),
-            purchaser: Option::Some(purchaser),
-            taker: true,
             for_outcome,
             outcome_index,
             price,
@@ -146,8 +141,6 @@ impl OrderMatch {
     pub fn maker(for_outcome: bool, outcome_index: u16, price: f64, stake: u64) -> Self {
         OrderMatch {
             pk: Option::None,
-            purchaser: Option::None,
-            taker: false,
             for_outcome,
             outcome_index,
             price,
