@@ -194,11 +194,17 @@ pub struct MarketOutcomePriceLiquidity {
     pub outcome: u16,
     pub price: f64,
     pub liquidity: u64,
-    pub sources: Vec<(u16, f64)>,
+    pub sources: Vec<LiquidityKey>,
+}
+
+#[derive(AnchorSerialize, AnchorDeserialize, Clone, Debug, Default, PartialEq)]
+pub struct LiquidityKey {
+    pub outcome: u16,
+    pub price: f64,
 }
 
 impl MarketOutcomePriceLiquidity {
-    pub const SIZE: usize = U16_SIZE + F64_SIZE + U64_SIZE;
+    pub const SIZE: usize = U16_SIZE + F64_SIZE + U64_SIZE + vec_size(U16_SIZE + F64_SIZE, 3);
 }
 
 #[cfg(test)]

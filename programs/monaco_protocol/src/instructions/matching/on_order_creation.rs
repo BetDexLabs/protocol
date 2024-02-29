@@ -5,7 +5,7 @@ use crate::state::market_matching_queue_account::*;
 use crate::state::order_account::*;
 use anchor_lang::prelude::*;
 
-pub const MATCH_CAPACITY: usize = 10_usize;
+pub const MATCH_CAPACITY: usize = 8_usize;
 
 pub fn on_order_creation(
     market_liquidities: &mut MarketLiquidities,
@@ -59,8 +59,8 @@ pub fn on_order_creation(
                         .matches
                         .enqueue(OrderMatch::maker(
                             order.for_outcome,
-                            liquidity_source.0,
-                            liquidity_source.1,
+                            liquidity_source.outcome,
+                            liquidity_source.price,
                             liquidity_source_stake_matched,
                         ))
                         .ok_or(MatchingQueueIsFull)?;
@@ -147,8 +147,8 @@ pub fn on_order_creation(
                         .matches
                         .enqueue(OrderMatch::maker(
                             order.for_outcome,
-                            liquidity_source.0,
-                            liquidity_source.1,
+                            liquidity_source.outcome,
+                            liquidity_source.price,
                             liquidity_source_stake_matched,
                         ))
                         .ok_or(MatchingQueueIsFull)?;

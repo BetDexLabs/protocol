@@ -15,17 +15,60 @@ use crate::state::trade_account::Trade;
 
 use super::update_matching_pool_with_matched_order;
 
-pub fn on_order_match(
+pub fn on_order_match_taker(
+    market_pk: &Pubkey,
+    market: &mut Market,
+    market_matching_queue: &mut MarketMatchingQueue,
+    order_pk: &Pubkey,
+    order: &mut Order,
+    order_trade: &mut Trade,
+    payer: &Pubkey,
+) -> Result<()> {
+    let now = current_timestamp();
+
+    match market_matching_queue.matches.peek_mut() {
+        None => Err(error!(CoreError::MatchingMatchingQueueEmpty)),
+        Some(order_match) => {
+            let matched_stake = order_match.stake;
+            let matched_price = order_match.price;
+
+            create_trade(
+                order_trade,
+                &order.purchaser,
+                &order.market,
+                order_pk,
+                order.market_outcome_index,
+                order.for_outcome,
+                matched_stake,
+                matched_price,
+                now,
+                *payer,
+            );
+            market.increment_unclosed_accounts_count()?;
+
+            emit!(TradeEvent {
+                amount: matched_stake,
+                price: matched_price,
+                market: *market_pk,
+            });
+
+            // dequeue empty matches (needs to be last due to borrowing)
+            market_matching_queue.matches.dequeue();
+
+            Ok(())
+        }
+    }
+}
+
+pub fn on_order_match_maker(
     market_pk: &Pubkey,
     market: &mut Market,
     market_matching_queue: &mut MarketMatchingQueue,
     market_matching_pool: &mut MarketMatchingPool,
-
     order_pk: &Pubkey,
     order: &mut Order,
     market_position: &mut MarketPosition,
     order_trade: &mut Trade,
-
     payer: &Pubkey,
 ) -> Result<u64> {
     let now = current_timestamp();
@@ -36,42 +79,36 @@ pub fn on_order_match(
             let matched_stake = order.stake_unmatched.min(order_match.stake);
             let matched_price = order_match.price;
 
-            let refund;
+            // update order
+            order.match_stake_unmatched(matched_stake, matched_price)?;
+            let refund = market_position::update_on_order_match(
+                market_position,
+                order,
+                matched_stake,
+                matched_price,
+            )?;
+            update_matching_pool_with_matched_order(
+                market_matching_pool,
+                matched_stake,
+                *order_pk,
+                order.stake_unmatched == 0_u64,
+            )?;
 
-            if order_match.taker {
-                refund = 0_u64;
-            } else {
-                // update order
-                order.match_stake_unmatched(matched_stake, matched_price)?;
-                refund = market_position::update_on_order_match(
-                    market_position,
-                    order,
-                    matched_stake,
-                    matched_price,
-                )?;
-                update_matching_pool_with_matched_order(
-                    market_matching_pool,
-                    matched_stake,
-                    *order_pk,
-                    order.stake_unmatched == 0_u64,
-                )?;
+            // update order match
+            order_match.stake = order_match
+                .stake
+                .checked_sub(matched_stake)
+                .ok_or(CoreError::MatchingMatchedStakeCalculationError)?;
 
-                // update order match
-                order_match.stake = order_match
-                    .stake
-                    .checked_sub(matched_stake)
-                    .ok_or(CoreError::MatchingMatchedStakeCalculationError)?;
-
-                // update product commission tracking for matched risk
-                update_product_commission_contributions(
-                    market_position,
-                    order,
-                    match order.for_outcome {
-                        true => matched_stake,
-                        false => calculate_risk_from_stake(matched_stake, matched_price),
-                    },
-                )?;
-            }
+            // update product commission tracking for matched risk
+            update_product_commission_contributions(
+                market_position,
+                order,
+                match order.for_outcome {
+                    true => matched_stake,
+                    false => calculate_risk_from_stake(matched_stake, matched_price),
+                },
+            )?;
 
             // store maker trade
             create_trade(
@@ -95,7 +132,7 @@ pub fn on_order_match(
             });
 
             // dequeue empty matches (needs to be last due to borrowing)
-            if order_match.taker || order_match.stake == 0_u64 {
+            if order_match.stake == 0_u64 {
                 market_matching_queue.matches.dequeue();
             }
 
@@ -166,7 +203,7 @@ mod test {
 
         let mut maker_order_trade = Trade::default();
 
-        let on_order_match_testable_result = on_order_match(
+        let on_order_match_testable_result = on_order_match_maker(
             &market_pk,
             &mut market,
             &mut market_matching_queue,
@@ -256,7 +293,7 @@ mod test {
 
         let mut maker_order_trade = Trade::default();
 
-        let on_order_match_testable_result = on_order_match(
+        let on_order_match_testable_result = on_order_match_maker(
             &market_pk,
             &mut market,
             &mut market_matching_queue,
@@ -342,7 +379,7 @@ mod test {
 
         let mut maker_order_trade = Trade::default();
 
-        let on_order_match_testable_result = on_order_match(
+        let on_order_match_testable_result = on_order_match_maker(
             &market_pk,
             &mut market,
             &mut market_matching_queue,

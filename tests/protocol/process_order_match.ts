@@ -1,9 +1,6 @@
 import assert from "assert";
 import { monaco } from "../util/wrappers";
 import { createWalletWithBalance } from "../util/test_util";
-import { SystemProgram } from "@solana/web3.js";
-import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
-import { findTradePda } from "../../npm-client";
 
 describe("Matching Crank", () => {
   it("Success", async () => {
@@ -30,78 +27,6 @@ describe("Matching Crank", () => {
         { stakeUnmatched: 0, stakeVoided: 0, status: { matched: {} } },
       ],
     );
-  });
-
-  /**
-   * Trying to test passing a maker order that has no more unmatched stake.
-   * However, such situation would mean order would be off the matching queue.
-   */
-  it("Fail: maker order processed twice", async () => {
-    // GIVEN
-
-    // Create market, purchaser
-    const [purchaserA, purchaserB, market] = await Promise.all([
-      createWalletWithBalance(monaco.provider),
-      createWalletWithBalance(monaco.provider),
-      monaco.create3WayMarket([3.0]),
-    ]);
-    await market.airdrop(purchaserA, 100.0);
-    await market.airdrop(purchaserB, 100.0);
-
-    const makerOrderPk = await market.againstOrder(1, 10, 3.0, purchaserA);
-    await market.againstOrder(1, 10, 3.0, purchaserA);
-    const takerOrderPk = await market.forOrder(1, 20, 3.0, purchaserB);
-
-    const result = await market.processMatchingQueue();
-
-    assert.deepEqual(
-      await Promise.all([
-        monaco.getOrder(makerOrderPk),
-        monaco.getOrder(takerOrderPk),
-      ]),
-      [
-        { stakeUnmatched: 0, stakeVoided: 0, status: { matched: {} } },
-        { stakeUnmatched: 0, stakeVoided: 0, status: { matched: {} } },
-      ],
-    );
-
-    const [makerOrderTradePk, takerOrderTradePk] = (
-      await Promise.all([
-        findTradePda(monaco.getRawProgram(), makerOrderPk, 1),
-        findTradePda(monaco.getRawProgram(), takerOrderPk, 0),
-      ])
-    ).map((result) => result.data.tradePk);
-
-    // THEN
-    await monaco.program.methods
-      .processOrderMatch(1, 0)
-      .accounts({
-        market: market.pk,
-        marketEscrow: market.escrowPk,
-        marketMatchingPool: result.matchingPool,
-        marketMatchingQueue: market.matchingQueuePk,
-        makerOrder: makerOrderPk,
-        marketPosition: await market.cacheMarketPositionPk(
-          purchaserA.publicKey,
-        ),
-        purchaserToken: await market.cachePurchaserTokenPk(
-          purchaserA.publicKey,
-        ),
-        makerOrderTrade: makerOrderTradePk,
-        takerOrderTrade: takerOrderTradePk,
-        crankOperator: monaco.operatorPk,
-        systemProgram: SystemProgram.programId,
-        tokenProgram: TOKEN_PROGRAM_ID,
-      })
-      .rpc()
-      .then(
-        function (_) {
-          assert.fail("This test should have thrown an error");
-        },
-        function (e) {
-          assert.equal(e.error.errorCode.code, "MatchingMakerOrderMismatch");
-        },
-      );
   });
 
   /**
@@ -134,17 +59,8 @@ describe("Matching Crank", () => {
     const against11Pk = await market.againstOrder(1, 10, 4.0, purchaserA);
     const forPk = await market.forOrder(1, 110, 3.0, purchaserB);
 
-    assert.equal(10, await market.getMarketMatchingQueueLength());
+    assert.equal(await market.getMarketMatchingQueueLength(), 16);
 
-    await market.processMatchingQueue();
-    await market.processMatchingQueue();
-    await market.processMatchingQueue();
-    await market.processMatchingQueue();
-    await market.processMatchingQueue();
-    await market.processMatchingQueue();
-    await market.processMatchingQueue();
-    await market.processMatchingQueue();
-    await market.processMatchingQueue();
     await market.processMatchingQueue();
 
     assert.deepEqual(
@@ -165,6 +81,8 @@ describe("Matching Crank", () => {
       ]),
       [
         { stakeUnmatched: 10, stakeVoided: 0, status: { open: {} } },
+        { stakeUnmatched: 10, stakeVoided: 0, status: { open: {} } },
+        { stakeUnmatched: 10, stakeVoided: 0, status: { open: {} } },
         { stakeUnmatched: 0, stakeVoided: 0, status: { matched: {} } },
         { stakeUnmatched: 0, stakeVoided: 0, status: { matched: {} } },
         { stakeUnmatched: 0, stakeVoided: 0, status: { matched: {} } },
@@ -173,9 +91,7 @@ describe("Matching Crank", () => {
         { stakeUnmatched: 0, stakeVoided: 0, status: { matched: {} } },
         { stakeUnmatched: 0, stakeVoided: 0, status: { matched: {} } },
         { stakeUnmatched: 0, stakeVoided: 0, status: { matched: {} } },
-        { stakeUnmatched: 0, stakeVoided: 0, status: { matched: {} } },
-        { stakeUnmatched: 0, stakeVoided: 0, status: { matched: {} } },
-        { stakeUnmatched: 10, stakeVoided: 0, status: { matched: {} } },
+        { stakeUnmatched: 30, stakeVoided: 0, status: { matched: {} } },
         0,
       ],
     );

@@ -118,7 +118,7 @@ pub struct OrderMatch {
 }
 
 impl OrderMatch {
-    pub const SIZE: usize = PUB_KEY_SIZE * 2 +  // pk, purchaser
+    pub const SIZE: usize = option_size(PUB_KEY_SIZE) * 2 +  // pk, purchaser
         BOOL_SIZE * 2 + // taker, for_outcome
         U16_SIZE + // outcome_index
         F64_SIZE + // price
