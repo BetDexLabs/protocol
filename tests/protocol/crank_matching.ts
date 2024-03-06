@@ -37,23 +37,24 @@ describe("Matching Crank", () => {
       purchaser.publicKey,
     );
 
-    const [forTradePk, againstTradePk] = (
-      await Promise.all([
-        findTradePda(monaco.getRawProgram(), forOrderPk, 0),
-        findTradePda(monaco.getRawProgram(), againstOrderPk, 1),
-      ])
-    ).map((result) => result.data.tradePk);
+    const [forTradePk, againstTradePk] = await Promise.all([
+      findTradePda(monaco.getRawProgram(), forOrderPk),
+      findTradePda(monaco.getRawProgram(), againstOrderPk),
+    ]);
 
     //
     // CRANK
     //
     const ix = await monaco.program.methods
-      .matchOrders(0, 1)
+      .matchOrders(
+        Array.from(forTradePk.data.distinctSeed),
+        Array.from(againstTradePk.data.distinctSeed),
+      )
       .accounts({
         orderFor: forOrderPk,
         orderAgainst: againstOrderPk,
-        tradeFor: forTradePk,
-        tradeAgainst: againstTradePk,
+        tradeFor: forTradePk.data.tradePk,
+        tradeAgainst: againstTradePk.data.tradePk,
         marketPositionFor: marketPositionPda,
         marketPositionAgainst: marketPositionPda,
         purchaserTokenAccountFor: purchaserToken,
@@ -329,20 +330,24 @@ describe("Matching Crank", () => {
     const marketPositionPda = await market.cacheMarketPositionPk(
       purchaser.publicKey,
     );
-    const againstTradePk = (
-      await findTradePda(monaco.getRawProgram(), againstOrderPk, 1)
-    ).data.tradePk;
+    const againstTradePk = await findTradePda(
+      monaco.getRawProgram(),
+      againstOrderPk,
+    );
 
     //
     // CRANK
     //
     const ix = await monaco.program.methods
-      .matchOrders(1, 1)
+      .matchOrders(
+        Array.from(againstTradePk.data.distinctSeed),
+        Array.from(againstTradePk.data.distinctSeed),
+      )
       .accounts({
         orderFor: againstOrderPk,
         orderAgainst: againstOrderPk,
-        tradeFor: againstTradePk,
-        tradeAgainst: againstTradePk,
+        tradeFor: againstTradePk.data.tradePk,
+        tradeAgainst: againstTradePk.data.tradePk,
         marketPositionFor: marketPositionPda,
         marketPositionAgainst: marketPositionPda,
         purchaserTokenAccountFor: purchaserToken,
@@ -383,7 +388,7 @@ describe("Matching Crank", () => {
     );
 
     // Check that the trades have not been created
-    await monaco.program.account.trade.fetch(againstTradePk).then(
+    await monaco.program.account.trade.fetch(againstTradePk.data.tradePk).then(
       (_) => assert.fail("An error should have been thrown"),
       (err) => expect(err.message).toContain("Account does not exist"),
     );
@@ -409,20 +414,20 @@ describe("Matching Crank", () => {
     const marketPositionPda = await market.cacheMarketPositionPk(
       purchaser.publicKey,
     );
-    const forTradePk = (
-      await findTradePda(monaco.getRawProgram(), forOrderPk, 0)
-    ).data.tradePk;
-
+    const forTradePk = await findTradePda(monaco.getRawProgram(), forOrderPk);
     //
     // CRANK
     //
     const ix = await monaco.program.methods
-      .matchOrders(0, 0)
+      .matchOrders(
+        Array.from(forTradePk.data.distinctSeed),
+        Array.from(forTradePk.data.distinctSeed),
+      )
       .accounts({
         orderFor: forOrderPk,
         orderAgainst: forOrderPk,
-        tradeFor: forTradePk,
-        tradeAgainst: forTradePk,
+        tradeFor: forTradePk.data.tradePk,
+        tradeAgainst: forTradePk.data.tradePk,
         marketPositionFor: marketPositionPda,
         marketPositionAgainst: marketPositionPda,
         purchaserTokenAccountFor: purchaserToken,
@@ -463,7 +468,7 @@ describe("Matching Crank", () => {
     );
 
     // Check that the trades have not been created
-    await monaco.program.account.trade.fetch(forTradePk).then(
+    await monaco.program.account.trade.fetch(forTradePk.data.tradePk).then(
       (_) => assert.fail("An error should have been thrown"),
       (err) => expect(err.message).toContain("Account does not exist"),
     );
@@ -492,23 +497,24 @@ describe("Matching Crank", () => {
     const marketPositionPda = await market.cacheMarketPositionPk(
       purchaser.publicKey,
     );
-    const [forTradePk, againstTradePk] = (
-      await Promise.all([
-        findTradePda(monaco.getRawProgram(), forOrderPk, 0),
-        findTradePda(monaco.getRawProgram(), forOrder2Pk, 0),
-      ])
-    ).map((result) => result.data.tradePk);
+    const [forTradePk, forTrade2Pk] = await Promise.all([
+      findTradePda(monaco.getRawProgram(), forOrderPk),
+      findTradePda(monaco.getRawProgram(), forOrder2Pk),
+    ]);
 
     //
     // CRANK
     //
     const ix = await monaco.program.methods
-      .matchOrders(0, 0)
+      .matchOrders(
+        Array.from(forTradePk.data.distinctSeed),
+        Array.from(forTrade2Pk.data.distinctSeed),
+      )
       .accounts({
         orderFor: forOrderPk,
         orderAgainst: forOrder2Pk,
-        tradeFor: forTradePk,
-        tradeAgainst: againstTradePk,
+        tradeFor: forTradePk.data.tradePk,
+        tradeAgainst: forTrade2Pk.data.tradePk,
         marketPositionFor: marketPositionPda,
         marketPositionAgainst: marketPositionPda,
         purchaserTokenAccountFor: purchaserToken,
@@ -581,23 +587,24 @@ describe("Matching Crank", () => {
     const marketPositionPda = await market.cacheMarketPositionPk(
       purchaser.publicKey,
     );
-    const [againstTrade2Pk, againstTradePk] = (
-      await Promise.all([
-        findTradePda(monaco.getRawProgram(), againstOrder2Pk, 0),
-        findTradePda(monaco.getRawProgram(), againstOrderPk, 1),
-      ])
-    ).map((result) => result.data.tradePk);
+    const [againstTrade2Pk, againstTradePk] = await Promise.all([
+      findTradePda(monaco.getRawProgram(), againstOrder2Pk),
+      findTradePda(monaco.getRawProgram(), againstOrderPk),
+    ]);
 
     //
     // CRANK
     //
     const ix = await monaco.program.methods
-      .matchOrders(0, 1)
+      .matchOrders(
+        Array.from(againstTrade2Pk.data.distinctSeed),
+        Array.from(againstTradePk.data.distinctSeed),
+      )
       .accounts({
         orderFor: againstOrder2Pk,
         orderAgainst: againstOrderPk,
-        tradeFor: againstTrade2Pk,
-        tradeAgainst: againstTradePk,
+        tradeFor: againstTrade2Pk.data.tradePk,
+        tradeAgainst: againstTradePk.data.tradePk,
         marketPositionFor: marketPositionPda,
         marketPositionAgainst: marketPositionPda,
         purchaserTokenAccountFor: purchaserToken,
@@ -671,23 +678,24 @@ describe("Matching Crank", () => {
     const marketPositionPda = await market.cacheMarketPositionPk(
       purchaser.publicKey,
     );
-    const [forTradePk, againstTradePk] = (
-      await Promise.all([
-        findTradePda(monaco.getRawProgram(), forOrderPk, 0),
-        findTradePda(monaco.getRawProgram(), forOrder2Pk, 0),
-      ])
-    ).map((result) => result.data.tradePk);
+    const [forTradePk, againstTradePk] = await Promise.all([
+      findTradePda(monaco.getRawProgram(), forOrderPk),
+      findTradePda(monaco.getRawProgram(), forOrder2Pk),
+    ]);
 
     //
     // CRANK
     //
     const ix = await monaco.program.methods
-      .matchOrders(0, 0)
+      .matchOrders(
+        Array.from(forTradePk.data.distinctSeed),
+        Array.from(againstTradePk.data.distinctSeed),
+      )
       .accounts({
         orderFor: forOrderPk,
         orderAgainst: forOrder2Pk,
-        tradeFor: forTradePk,
-        tradeAgainst: againstTradePk,
+        tradeFor: forTradePk.data.tradePk,
+        tradeAgainst: againstTradePk.data.tradePk,
         marketPositionFor: marketPositionPda,
         marketPositionAgainst: marketPositionPda,
         purchaserTokenAccountFor: purchaserToken,
@@ -761,23 +769,24 @@ describe("Matching Crank", () => {
     const marketPositionPda = await market.cacheMarketPositionPk(
       purchaser.publicKey,
     );
-    const [forTradePk, againstTradePk] = (
-      await Promise.all([
-        findTradePda(monaco.getRawProgram(), againstOrder2Pk, 0),
-        findTradePda(monaco.getRawProgram(), againstOrderPk, 1),
-      ])
-    ).map((result) => result.data.tradePk);
+    const [forTradePk, againstTradePk] = await Promise.all([
+      findTradePda(monaco.getRawProgram(), againstOrder2Pk),
+      findTradePda(monaco.getRawProgram(), againstOrderPk),
+    ]);
 
     //
     // CRANK
     //
     const ix = await monaco.program.methods
-      .matchOrders(0, 1)
+      .matchOrders(
+        Array.from(forTradePk.data.distinctSeed),
+        Array.from(againstTradePk.data.distinctSeed),
+      )
       .accounts({
         orderFor: againstOrder2Pk,
         orderAgainst: againstOrderPk,
-        tradeFor: forTradePk,
-        tradeAgainst: againstTradePk,
+        tradeFor: forTradePk.data.tradePk,
+        tradeAgainst: againstTradePk.data.tradePk,
         marketPositionFor: marketPositionPda,
         marketPositionAgainst: marketPositionPda,
         purchaserTokenAccountFor: purchaserToken,
@@ -839,23 +848,24 @@ describe("Matching Crank", () => {
     const marketPositionPda = await market.cacheMarketPositionPk(
       purchaser.publicKey,
     );
-    const [forTradePk, againstTradePk] = (
-      await Promise.all([
-        findTradePda(monaco.getRawProgram(), forOrderPk, 0),
-        findTradePda(monaco.getRawProgram(), againstOrderPk, 1),
-      ])
-    ).map((result) => result.data.tradePk);
+    const [forTradePk, againstTradePk] = await Promise.all([
+      findTradePda(monaco.getRawProgram(), forOrderPk),
+      findTradePda(monaco.getRawProgram(), againstOrderPk),
+    ]);
 
     //
     // CRANK
     //
     const ix = await monaco.program.methods
-      .matchOrders(0, 1)
+      .matchOrders(
+        Array.from(forTradePk.data.distinctSeed),
+        Array.from(againstTradePk.data.distinctSeed),
+      )
       .accounts({
         orderFor: forOrderPk,
         orderAgainst: againstOrderPk,
-        tradeFor: forTradePk,
-        tradeAgainst: againstTradePk,
+        tradeFor: forTradePk.data.tradePk,
+        tradeAgainst: againstTradePk.data.tradePk,
         marketPositionFor: marketPositionPda,
         marketPositionAgainst: marketPositionPda,
         purchaserTokenAccountFor: purchaserToken,
@@ -918,23 +928,24 @@ describe("Matching Crank", () => {
     const marketPositionPda = await market.cacheMarketPositionPk(
       purchaser.publicKey,
     );
-    const [forTradePk, againstTradePk] = (
-      await Promise.all([
-        findTradePda(monaco.getRawProgram(), forOrderPk, 0),
-        findTradePda(monaco.getRawProgram(), againstOrderPk, 0),
-      ])
-    ).map((result) => result.data.tradePk);
+    const [forTradePk, againstTradePk] = await Promise.all([
+      findTradePda(monaco.getRawProgram(), forOrderPk),
+      findTradePda(monaco.getRawProgram(), againstOrderPk),
+    ]);
 
     //
     // CRANK
     //
     const ix = await monaco.program.methods
-      .matchOrders(0, 0)
+      .matchOrders(
+        Array.from(forTradePk.data.distinctSeed),
+        Array.from(againstTradePk.data.distinctSeed),
+      )
       .accounts({
         orderFor: forOrderPk,
         orderAgainst: againstOrderPk,
-        tradeFor: forTradePk,
-        tradeAgainst: againstTradePk,
+        tradeFor: forTradePk.data.tradePk,
+        tradeAgainst: againstTradePk.data.tradePk,
         marketPositionFor: marketPositionPda,
         marketPositionAgainst: marketPositionPda,
         purchaserTokenAccountFor: purchaserToken,
@@ -997,23 +1008,24 @@ describe("Matching Crank", () => {
     const marketPositionPda = await market.cacheMarketPositionPk(
       purchaser.publicKey,
     );
-    const [forTradePk, againstTradePk] = (
-      await Promise.all([
-        findTradePda(monaco.getRawProgram(), forOrderPk, 0),
-        findTradePda(monaco.getRawProgram(), againstOrderPk, 1),
-      ])
-    ).map((result) => result.data.tradePk);
+    const [forTradePk, againstTradePk] = await Promise.all([
+      findTradePda(monaco.getRawProgram(), forOrderPk),
+      findTradePda(monaco.getRawProgram(), againstOrderPk),
+    ]);
 
     //
     // CRANK
     //
     const ix = await monaco.program.methods
-      .matchOrders(0, 1)
+      .matchOrders(
+        Array.from(forTradePk.data.distinctSeed),
+        Array.from(againstTradePk.data.distinctSeed),
+      )
       .accounts({
         orderFor: forOrderPk,
         orderAgainst: againstOrderPk,
-        tradeFor: forTradePk,
-        tradeAgainst: againstTradePk,
+        tradeFor: forTradePk.data.tradePk,
+        tradeAgainst: againstTradePk.data.tradePk,
         marketPositionFor: marketPositionPda,
         marketPositionAgainst: marketPositionPda,
         purchaserTokenAccountFor: purchaserToken,

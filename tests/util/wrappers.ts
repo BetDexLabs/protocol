@@ -685,10 +685,6 @@ export class MonacoMarket {
     this.marketAuthority = marketAuthority;
   }
 
-  randomNumber() {
-    return Math.floor(Math.random() * 65535);
-  }
-
   async getAccount() {
     return this.monaco.fetchMarket(this.pk);
   }
@@ -1178,12 +1174,9 @@ export class MonacoMarket {
       `forOutcome ${orderMatch.forOutcome} outcomeIndex ${orderMatch.outcomeIndex} price ${orderMatch.price} stake ${orderMatch.stake}`,
     );
 
-    const orderTradeSeed = this.randomNumber();
-
     if (orderMatch.pk) {
       const orderTradePk = await this.processMatchingQueueTakerOnce(
         orderMatch.pk,
-        orderTradeSeed,
         crankOperatorKeypair,
       );
 
@@ -1191,15 +1184,14 @@ export class MonacoMarket {
       return {
         remainingMatches,
         order: orderMatch.pk,
-        orderTrade: orderTradePk,
-        orderTradeSeed: orderTradeSeed,
+        orderTrade: orderTradePk.data.tradePk,
+        orderTradeSeed: orderTradePk.data.distinctSeed,
       };
     } else {
       const result = await this.processMatchingQueueMakerOnce(
         orderMatch.forOutcome,
         orderMatch.outcomeIndex,
         orderMatch.price,
-        orderTradeSeed,
         crankOperatorKeypair,
       );
 
@@ -1207,28 +1199,28 @@ export class MonacoMarket {
       return {
         remainingMatches,
         order: result.order,
-        orderTrade: result.orderTrade,
-        orderTradeSeed: orderTradeSeed,
+        orderTrade: result.orderTrade.data.tradePk,
+        orderTradeSeed: result.orderTrade.data.distinctSeed,
       };
     }
   }
 
   async processMatchingQueueTakerOnce(
     orderPk: PublicKey,
-    orderTradeSeed: number,
     crankOperatorKeypair?: Keypair,
   ) {
-    const orderTradePk = (
-      await findTradePda(this.monaco.getRawProgram(), orderPk, orderTradeSeed)
-    ).data.tradePk;
+    const orderTradePk = await findTradePda(
+      this.monaco.getRawProgram(),
+      orderPk,
+    );
 
     const ix = await this.monaco.program.methods
-      .processOrderMatchTaker(orderTradeSeed)
+      .processOrderMatchTaker(Array.from(orderTradePk.data.distinctSeed))
       .accounts({
         market: this.pk,
         marketMatchingQueue: this.matchingQueuePk,
         order: orderPk,
-        orderTrade: orderTradePk,
+        orderTrade: orderTradePk.data.tradePk,
         crankOperator:
           crankOperatorKeypair instanceof Keypair
             ? crankOperatorKeypair.publicKey
@@ -1258,7 +1250,6 @@ export class MonacoMarket {
     forOutcome: boolean,
     outcomeIndex: number,
     price: number,
-    orderTradeSeed: number,
     crankOperatorKeypair?: Keypair,
   ) {
     const matchingPools = this.matchingPools[outcomeIndex][price];
@@ -1269,12 +1260,13 @@ export class MonacoMarket {
     const orderPk = await this.monaco.getMarketMatchingPoolHead(matchingPoolPk);
 
     const order = await this.monaco.fetchOrder(orderPk);
-    const orderTradePk = (
-      await findTradePda(this.monaco.getRawProgram(), orderPk, orderTradeSeed)
-    ).data.tradePk;
+    const orderTradePk = await findTradePda(
+      this.monaco.getRawProgram(),
+      orderPk,
+    );
 
     const ix = await this.monaco.program.methods
-      .processOrderMatchMaker(orderTradeSeed)
+      .processOrderMatchMaker(Array.from(orderTradePk.data.distinctSeed))
       .accounts({
         market: this.pk,
         marketEscrow: this.escrowPk,
@@ -1283,7 +1275,7 @@ export class MonacoMarket {
         order: orderPk,
         marketPosition: await this.cacheMarketPositionPk(order.purchaser),
         purchaserToken: await this.cachePurchaserTokenPk(order.purchaser),
-        orderTrade: orderTradePk,
+        orderTrade: orderTradePk.data.tradePk,
         crankOperator:
           crankOperatorKeypair instanceof Keypair
             ? crankOperatorKeypair.publicKey
