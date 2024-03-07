@@ -1,5 +1,6 @@
 use crate::error::CoreError;
 use crate::error::CoreError::MatchingQueueIsFull;
+use crate::instructions::calculate_stake_cross;
 use crate::state::market_liquidities::MarketLiquidities;
 use crate::state::market_matching_queue_account::*;
 use crate::state::order_account::*;
@@ -14,6 +15,8 @@ pub fn on_order_creation(
     order: &mut Order,
 ) -> Result<Vec<(u64, f64)>> {
     let mut order_matches = Vec::with_capacity(MATCH_CAPACITY);
+    let mut order_sources = Vec::with_capacity(MATCH_CAPACITY * 2);
+
     let order_outcome = order.market_outcome_index;
 
     // FOR order matches AGAINST liquidity
@@ -37,8 +40,7 @@ pub fn on_order_creation(
             let stake_matched = liquidity.liquidity.min(order.stake_unmatched);
 
             if liquidity.sources.is_empty() {
-                // direct match
-
+                // straight match
                 market_matching_queue
                     .matches
                     .enqueue(OrderMatch::maker(
@@ -49,12 +51,14 @@ pub fn on_order_creation(
                     ))
                     .ok_or(MatchingQueueIsFull)?;
             } else {
-                // cross match TODO
-
+                // cross match
                 for liquidity_source in &liquidity.sources {
-                    // TODO proper liquidity_source_stake_matched calculation needed
-                    let liquidity_source_stake_matched = stake_matched;
-                    // TODO remove source liquidity
+                    let liquidity_source_stake_matched = calculate_stake_cross(
+                        stake_matched,
+                        liquidity.price,
+                        liquidity_source.price,
+                    );
+
                     market_matching_queue
                         .matches
                         .enqueue(OrderMatch::maker(
@@ -64,6 +68,12 @@ pub fn on_order_creation(
                             liquidity_source_stake_matched,
                         ))
                         .ok_or(MatchingQueueIsFull)?;
+
+                    order_sources.push((
+                        liquidity_source.outcome,
+                        liquidity_source.price,
+                        liquidity_source_stake_matched,
+                    ));
                 }
             }
 
@@ -91,6 +101,11 @@ pub fn on_order_creation(
         for (stake, price) in &order_matches {
             market_liquidities
                 .remove_liquidity_against(order.market_outcome_index, *price, *stake)
+                .map_err(|_| CoreError::MatchingRemainingLiquidityTooSmall)?;
+        }
+        for (outcome, price, stake) in &order_sources {
+            market_liquidities
+                .remove_liquidity_for(*outcome, *price, *stake)
                 .map_err(|_| CoreError::MatchingRemainingLiquidityTooSmall)?;
         }
 
@@ -124,8 +139,7 @@ pub fn on_order_creation(
             let stake_matched = liquidity.liquidity.min(order.stake_unmatched);
 
             if liquidity.sources.is_empty() {
-                // direct match
-
+                // straight match
                 market_matching_queue
                     .matches
                     .enqueue(OrderMatch::maker(
@@ -136,12 +150,14 @@ pub fn on_order_creation(
                     ))
                     .ok_or(MatchingQueueIsFull)?;
             } else {
-                // cross match TODO
-
+                // cross match
                 for liquidity_source in &liquidity.sources {
-                    // TODO proper liquidity_source_stake_matched calculation needed
-                    let liquidity_source_stake_matched = stake_matched;
-                    // TODO remove source liquidity
+                    let liquidity_source_stake_matched = calculate_stake_cross(
+                        stake_matched,
+                        liquidity.price,
+                        liquidity_source.price,
+                    );
+
                     market_matching_queue
                         .matches
                         .enqueue(OrderMatch::maker(
@@ -151,6 +167,12 @@ pub fn on_order_creation(
                             liquidity_source_stake_matched,
                         ))
                         .ok_or(MatchingQueueIsFull)?;
+
+                    order_sources.push((
+                        liquidity_source.outcome,
+                        liquidity_source.price,
+                        liquidity_source_stake_matched,
+                    ));
                 }
             }
 
@@ -180,6 +202,11 @@ pub fn on_order_creation(
                 .remove_liquidity_for(order.market_outcome_index, *price, *stake)
                 .map_err(|_| CoreError::MatchingRemainingLiquidityTooSmall)?;
         }
+        for (outcome, price, stake) in &order_sources {
+            market_liquidities
+                .remove_liquidity_against(*outcome, *price, *stake)
+                .map_err(|_| CoreError::MatchingRemainingLiquidityTooSmall)?;
+        }
 
         // remainder is added to liquidities
         if order.stake_unmatched > 0_u64 {
@@ -196,7 +223,7 @@ pub fn on_order_creation(
 
 #[cfg(test)]
 mod test {
-    use crate::state::market_liquidities::MarketOutcomePriceLiquidity;
+    use crate::state::market_liquidities::{LiquidityKey, MarketOutcomePriceLiquidity};
     use crate::state::market_matching_queue_account::MatchingQueue;
 
     use super::*;
@@ -241,7 +268,7 @@ mod test {
             liquidities(&market_liquidities.liquidities_against)
         );
         assert_eq!(
-            vec!((1.2, 10), (1.2, 10)),
+            vec!((true, 1.2, 10), (false, 1.2, 10)),
             matches(&market_matching_queue.matches)
         );
 
@@ -292,22 +319,22 @@ mod test {
         );
         assert_eq!(
             vec!(
-                (1.2, 10),
-                (1.2, 10),
-                (1.25, 10),
-                (1.25, 10),
-                (1.3, 10),
-                (1.3, 10),
-                (1.35, 10),
-                (1.35, 10),
-                (1.4, 10),
-                (1.4, 10),
-                (1.45, 10),
-                (1.45, 10),
-                (1.5, 10),
-                (1.5, 10),
-                (1.55, 10),
-                (1.55, 10),
+                (true, 1.2, 10),
+                (false, 1.2, 10),
+                (true, 1.25, 10),
+                (false, 1.25, 10),
+                (true, 1.3, 10),
+                (false, 1.3, 10),
+                (true, 1.35, 10),
+                (false, 1.35, 10),
+                (true, 1.4, 10),
+                (false, 1.4, 10),
+                (true, 1.45, 10),
+                (false, 1.45, 10),
+                (true, 1.5, 10),
+                (false, 1.5, 10),
+                (true, 1.55, 10),
+                (false, 1.55, 10),
             ),
             matches(&market_matching_queue.matches) // vec max length
         );
@@ -356,7 +383,7 @@ mod test {
             liquidities(&market_liquidities.liquidities_against)
         );
         assert_eq!(
-            Vec::<(f64, u64)>::new(),
+            Vec::<(bool, f64, u64)>::new(),
             matches(&market_matching_queue.matches)
         );
 
@@ -404,7 +431,7 @@ mod test {
             liquidities(&market_liquidities.liquidities_against)
         );
         assert_eq!(
-            vec!((1.2, 10), (1.2, 10)),
+            vec!((true, 1.2, 10), (false, 1.2, 10)),
             matches(&market_matching_queue.matches)
         );
 
@@ -452,7 +479,12 @@ mod test {
             liquidities(&market_liquidities.liquidities_against)
         );
         assert_eq!(
-            vec!((1.2, 10), (1.2, 10), (1.3, 10), (1.3, 10)),
+            vec!(
+                (true, 1.2, 10),
+                (false, 1.2, 10),
+                (true, 1.3, 10),
+                (false, 1.3, 10)
+            ),
             matches(&market_matching_queue.matches)
         );
 
@@ -501,12 +533,12 @@ mod test {
         );
         assert_eq!(
             vec!(
-                (1.2, 10),
-                (1.2, 10),
-                (1.3, 10),
-                (1.3, 10),
-                (1.4, 10),
-                (1.4, 10)
+                (true, 1.2, 10),
+                (false, 1.2, 10),
+                (true, 1.3, 10),
+                (false, 1.3, 10),
+                (true, 1.4, 10),
+                (false, 1.4, 10)
             ),
             matches(&market_matching_queue.matches)
         );
@@ -556,12 +588,12 @@ mod test {
         );
         assert_eq!(
             vec!(
-                (1.2, 10),
-                (1.2, 10),
-                (1.3, 10),
-                (1.3, 10),
-                (1.4, 10),
-                (1.4, 10)
+                (true, 1.2, 10),
+                (false, 1.2, 10),
+                (true, 1.3, 10),
+                (false, 1.3, 10),
+                (true, 1.4, 10),
+                (false, 1.4, 10)
             ),
             matches(&market_matching_queue.matches)
         );
@@ -610,7 +642,7 @@ mod test {
             liquidities(&market_liquidities.liquidities_against)
         );
         assert_eq!(
-            vec!((1.4, 10), (1.4, 10)),
+            vec!((false, 1.4, 10), (true, 1.4, 10)),
             matches(&market_matching_queue.matches)
         );
 
@@ -659,18 +691,18 @@ mod test {
         );
         assert_eq!(
             vec!(
-                (1.7, 10),
-                (1.7, 10),
-                (1.6, 10),
-                (1.6, 10),
-                (1.5, 10),
-                (1.5, 10),
-                (1.4, 10),
-                (1.4, 10),
-                (1.3, 10),
-                (1.3, 10),
-                (1.2, 10),
-                (1.2, 10)
+                (false, 1.7, 10),
+                (true, 1.7, 10),
+                (false, 1.6, 10),
+                (true, 1.6, 10),
+                (false, 1.5, 10),
+                (true, 1.5, 10),
+                (false, 1.4, 10),
+                (true, 1.4, 10),
+                (false, 1.3, 10),
+                (true, 1.3, 10),
+                (false, 1.2, 10),
+                (true, 1.2, 10)
             ),
             matches(&market_matching_queue.matches)
         );
@@ -720,12 +752,12 @@ mod test {
         );
         assert_eq!(
             vec!(
-                (1.4, 10),
-                (1.4, 10),
-                (1.3, 10),
-                (1.3, 10),
-                (1.2, 10),
-                (1.2, 10)
+                (false, 1.4, 10),
+                (true, 1.4, 10),
+                (false, 1.3, 10),
+                (true, 1.3, 10),
+                (false, 1.2, 10),
+                (true, 1.2, 10)
             ),
             matches(&market_matching_queue.matches)
         );
@@ -775,12 +807,12 @@ mod test {
         );
         assert_eq!(
             vec!(
-                (1.4, 10),
-                (1.4, 10),
-                (1.3, 10),
-                (1.3, 10),
-                (1.2, 10),
-                (1.2, 10)
+                (false, 1.4, 10),
+                (true, 1.4, 10),
+                (false, 1.3, 10),
+                (true, 1.3, 10),
+                (false, 1.2, 10),
+                (true, 1.2, 10)
             ),
             matches(&market_matching_queue.matches)
         );
@@ -829,7 +861,12 @@ mod test {
             liquidities(&market_liquidities.liquidities_against)
         );
         assert_eq!(
-            vec!((1.4, 10), (1.4, 10), (1.3, 10), (1.3, 10),),
+            vec!(
+                (false, 1.4, 10),
+                (true, 1.4, 10),
+                (false, 1.3, 10),
+                (true, 1.3, 10),
+            ),
             matches(&market_matching_queue.matches)
         );
 
@@ -877,7 +914,7 @@ mod test {
             liquidities(&market_liquidities.liquidities_against)
         );
         assert_eq!(
-            vec!((1.4, 10), (1.4, 10)),
+            vec!((false, 1.4, 10), (true, 1.4, 10)),
             matches(&market_matching_queue.matches)
         );
 
@@ -925,12 +962,217 @@ mod test {
             liquidities(&market_liquidities.liquidities_against)
         );
         assert_eq!(
-            Vec::<(f64, u64)>::new(),
+            Vec::<(bool, f64, u64)>::new(),
             matches(&market_matching_queue.matches)
         );
 
         assert_eq!(100_u64, order.stake_unmatched);
         assert_eq!(0_u64, order.payout);
+    }
+
+    #[test]
+    fn match_for_order_cross_3way() {
+        let market_pk = Pubkey::new_unique();
+        let payer_pk = Pubkey::new_unique();
+
+        let order_pk = Pubkey::new_unique();
+        let mut order = mock_order(market_pk, 0, true, 3.5, 100, payer_pk);
+
+        let mut market_liquidities = mock_market_liquidities(market_pk);
+        market_liquidities.add_liquidity_for(1, 2.8, 200).unwrap();
+        market_liquidities.add_liquidity_for(2, 2.8, 200).unwrap();
+        market_liquidities
+            .add_liquidity_against(0, 3.5, 200)
+            .unwrap();
+        market_liquidities
+            .set_liquidity_against_sources(
+                0,
+                3.5,
+                vec![
+                    LiquidityKey {
+                        outcome: 1,
+                        price: 2.8,
+                    },
+                    LiquidityKey {
+                        outcome: 2,
+                        price: 2.8,
+                    },
+                ],
+            )
+            .unwrap();
+
+        let mut market_matching_queue = MarketMatchingQueue {
+            market: market_pk,
+            matches: MatchingQueue::new(10),
+        };
+
+        let on_order_creation_result = on_order_creation(
+            &mut market_liquidities,
+            &mut market_matching_queue,
+            &order_pk,
+            &mut order,
+        );
+
+        assert!(on_order_creation_result.is_ok());
+
+        assert_eq!(
+            vec!((2.8, 75), (2.8, 75)),
+            liquidities(&market_liquidities.liquidities_for)
+        );
+        assert_eq!(
+            vec!((3.5, 100)),
+            liquidities(&market_liquidities.liquidities_against)
+        );
+        assert_eq!(
+            vec!((true, 2.8, 125), (true, 2.8, 125), (true, 3.5, 100)),
+            matches(&market_matching_queue.matches)
+        );
+
+        assert_eq!(0_u64, order.stake_unmatched);
+        assert_eq!(350_u64, order.payout);
+    }
+
+    #[test]
+    fn match_for_order_cross_4way() {
+        let prices = vec![3.0, 3.6, 4.0, 7.2];
+        let market_pk = Pubkey::new_unique();
+        let payer_pk = Pubkey::new_unique();
+
+        let order_pk = Pubkey::new_unique();
+        let mut order = mock_order(market_pk, 0, true, prices[0], 120, payer_pk);
+
+        let mut market_liquidities = mock_market_liquidities(market_pk);
+        market_liquidities
+            .add_liquidity_for(1, prices[1], 200)
+            .unwrap();
+        market_liquidities
+            .add_liquidity_for(2, prices[2], 200)
+            .unwrap();
+        market_liquidities
+            .add_liquidity_for(3, prices[3], 200)
+            .unwrap();
+        market_liquidities
+            .add_liquidity_against(0, prices[0], 121)
+            .unwrap();
+        market_liquidities
+            .set_liquidity_against_sources(
+                0,
+                3.0,
+                vec![
+                    LiquidityKey {
+                        outcome: 1,
+                        price: prices[1],
+                    },
+                    LiquidityKey {
+                        outcome: 2,
+                        price: prices[2],
+                    },
+                    LiquidityKey {
+                        outcome: 3,
+                        price: prices[3],
+                    },
+                ],
+            )
+            .unwrap();
+
+        let mut market_matching_queue = MarketMatchingQueue {
+            market: market_pk,
+            matches: MatchingQueue::new(10),
+        };
+
+        let on_order_creation_result = on_order_creation(
+            &mut market_liquidities,
+            &mut market_matching_queue,
+            &order_pk,
+            &mut order,
+        );
+
+        assert!(on_order_creation_result.is_ok());
+
+        assert_eq!(
+            vec!((3.6, 100), (4.0, 110), (7.2, 150)),
+            liquidities(&market_liquidities.liquidities_for)
+        );
+        assert_eq!(
+            vec!((3.0, 1)),
+            liquidities(&market_liquidities.liquidities_against)
+        );
+        assert_eq!(
+            vec!(
+                (true, 3.6, 100),
+                (true, 4.0, 90),
+                (true, 7.2, 50),
+                (true, 3.0, 120)
+            ),
+            matches(&market_matching_queue.matches)
+        );
+
+        assert_eq!(0_u64, order.stake_unmatched);
+        assert_eq!(360_u64, order.payout);
+    }
+
+    #[test]
+    fn match_against_order_cross_3way() {
+        let market_pk = Pubkey::new_unique();
+        let payer_pk = Pubkey::new_unique();
+
+        let order_pk = Pubkey::new_unique();
+        let mut order = mock_order(market_pk, 0, false, 3.5, 100, payer_pk);
+
+        let mut market_liquidities = mock_market_liquidities(market_pk);
+        market_liquidities
+            .add_liquidity_against(1, 2.8, 200)
+            .unwrap();
+        market_liquidities
+            .add_liquidity_against(2, 2.8, 200)
+            .unwrap();
+        market_liquidities.add_liquidity_for(0, 3.5, 200).unwrap();
+        market_liquidities
+            .set_liquidity_for_sources(
+                0,
+                3.5,
+                vec![
+                    LiquidityKey {
+                        outcome: 1,
+                        price: 2.8,
+                    },
+                    LiquidityKey {
+                        outcome: 2,
+                        price: 2.8,
+                    },
+                ],
+            )
+            .unwrap();
+
+        let mut market_matching_queue = MarketMatchingQueue {
+            market: market_pk,
+            matches: MatchingQueue::new(10),
+        };
+
+        let on_order_creation_result = on_order_creation(
+            &mut market_liquidities,
+            &mut market_matching_queue,
+            &order_pk,
+            &mut order,
+        );
+
+        assert!(on_order_creation_result.is_ok());
+
+        assert_eq!(
+            vec!((3.5, 100)),
+            liquidities(&market_liquidities.liquidities_for)
+        );
+        assert_eq!(
+            vec!((2.8, 75), (2.8, 75)),
+            liquidities(&market_liquidities.liquidities_against)
+        );
+        assert_eq!(
+            vec!((false, 2.8, 125), (false, 2.8, 125), (false, 3.5, 100)),
+            matches(&market_matching_queue.matches)
+        );
+
+        assert_eq!(0_u64, order.stake_unmatched);
+        assert_eq!(350_u64, order.payout);
     }
 
     fn mock_market_liquidities(market: Pubkey) -> MarketLiquidities {
@@ -948,11 +1190,11 @@ mod test {
             .collect::<Vec<(f64, u64)>>()
     }
 
-    fn matches(matches: &MatchingQueue) -> Vec<(f64, u64)> {
+    fn matches(matches: &MatchingQueue) -> Vec<(bool, f64, u64)> {
         matches
             .to_vec()
             .iter()
-            .map(|v| (v.price, v.stake))
-            .collect::<Vec<(f64, u64)>>()
+            .map(|v| (v.for_outcome, v.price, v.stake))
+            .collect::<Vec<(bool, f64, u64)>>()
     }
 }
