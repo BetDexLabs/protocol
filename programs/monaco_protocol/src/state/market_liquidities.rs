@@ -135,25 +135,37 @@ impl MarketLiquidities {
         }
     }
 
-    pub fn set_liquidity_for(&mut self, outcome: u16, price: f64, liquidity: u64) {
+    pub fn set_liquidity_for(
+        &mut self,
+        outcome: u16,
+        price: f64,
+        liquidity: u64,
+        sources: Vec<LiquidityKey>,
+    ) {
         Self::set_liquidity(
             &mut self.liquidities_for,
             Self::sorter_for(outcome, price),
             outcome,
             price,
             liquidity,
-            vec![],
+            sources,
         )
     }
 
-    pub fn set_liquidity_against(&mut self, outcome: u16, price: f64, liquidity: u64) {
+    pub fn set_liquidity_against(
+        &mut self,
+        outcome: u16,
+        price: f64,
+        liquidity: u64,
+        sources: Vec<LiquidityKey>,
+    ) {
         Self::set_liquidity(
             &mut self.liquidities_against,
             Self::sorter_against(outcome, price),
             outcome,
             price,
             liquidity,
-            vec![],
+            sources,
         )
     }
 

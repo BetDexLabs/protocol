@@ -38,7 +38,15 @@ describe("Order Creation Cross Liquidity", () => {
 
     assert.deepEqual(await market.getMarketLiquidities(), {
       liquiditiesAgainst: [
-        { liquidity: 40, outcome: 2, price: 5.25, sources: [] },
+        {
+          liquidity: 40,
+          outcome: 2,
+          price: 5.25,
+          sources: [
+            { outcome: 0, price: 2.1 },
+            { outcome: 1, price: 3 },
+          ],
+        },
       ],
       liquiditiesFor: [
         { liquidity: 100, outcome: 0, price: 2.1, sources: [] },
