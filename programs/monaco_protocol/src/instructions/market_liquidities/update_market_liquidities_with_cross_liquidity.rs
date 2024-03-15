@@ -53,6 +53,7 @@ pub fn update_market_liquidities_with_cross_liquidity(
                     .unwrap_or(0_u64);
 
                 // update liquidity
+                // TODO sources are missing
                 if source_for_outcome {
                     market_liquidities.set_liquidity_against(
                         cross_liquidity.outcome,
