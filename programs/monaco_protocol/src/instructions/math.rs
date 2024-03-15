@@ -35,8 +35,7 @@ pub fn calculate_stake_cross(stake: u64, price: f64, price_cross: f64) -> u64 {
 
     let stake_cross_decimal = stake_matched_decimal
         .mul(price_matched_decimal)
-        .checked_div(price_cross_decimal)
-        .unwrap();
+        .div(price_cross_decimal);
 
     stake_cross_decimal.to_u64().unwrap()
 }

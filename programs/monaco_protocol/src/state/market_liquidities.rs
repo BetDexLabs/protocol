@@ -1,11 +1,9 @@
-use std::cmp::Ordering;
-use std::string::ToString;
-
-use anchor_lang::prelude::*;
-
 use crate::error::CoreError;
 use crate::state::market_account::MarketOrderBehaviour;
 use crate::state::type_size::*;
+use anchor_lang::prelude::*;
+use std::cmp::Ordering;
+use std::string::ToString;
 
 #[account]
 pub struct MarketLiquidities {
@@ -285,6 +283,12 @@ pub struct MarketOutcomePriceLiquidity {
 pub struct LiquidityKey {
     pub outcome: u16,
     pub price: f64,
+}
+
+impl LiquidityKey {
+    pub fn new(outcome: u16, price: f64) -> LiquidityKey {
+        LiquidityKey { outcome, price }
+    }
 }
 
 impl MarketOutcomePriceLiquidity {
