@@ -22,32 +22,26 @@ pub fn update_market_liquidities_with_cross_liquidity(
                 // calculate stake
                 let cross_liquidity_stake = source_liquidities
                     .iter()
-                    .map(|source_liquidity| {
-                        if source_for_outcome {
-                            calculate_stake_cross(
-                                market_liquidities
-                                    .get_liquidity_for(
-                                        source_liquidity.outcome,
-                                        source_liquidity.price,
-                                    )
-                                    .map(|source_liquidity| source_liquidity.liquidity)
-                                    .unwrap_or(0_u64),
-                                source_liquidity.price,
-                                cross_price,
+                    .map(|source_liquidity_key| {
+                        let source_liquidity = if source_for_outcome {
+                            market_liquidities.get_liquidity_for(
+                                source_liquidity_key.outcome,
+                                source_liquidity_key.price,
                             )
                         } else {
-                            calculate_stake_cross(
-                                market_liquidities
-                                    .get_liquidity_against(
-                                        source_liquidity.outcome,
-                                        source_liquidity.price,
-                                    )
-                                    .map(|source_liquidity| source_liquidity.liquidity)
-                                    .unwrap_or(0_u64),
-                                source_liquidity.price,
-                                cross_price,
+                            market_liquidities.get_liquidity_against(
+                                source_liquidity_key.outcome,
+                                source_liquidity_key.price,
                             )
-                        }
+                        };
+
+                        calculate_stake_cross(
+                            source_liquidity
+                                .map(|source_liquidity| source_liquidity.liquidity)
+                                .unwrap_or(0_u64),
+                            source_liquidity_key.price,
+                            cross_price,
+                        )
                     })
                     .min()
                     .unwrap_or(0_u64);
@@ -88,12 +82,14 @@ mod test {
     #[test]
     fn test_2_way_market() {
         let mut market_liquidities = mock_market_liquidities(Pubkey::new_unique());
-        market_liquidities.add_liquidity_for(0, 3.0, 100).unwrap();
-        market_liquidities.add_liquidity_for(0, 3.5, 100).unwrap();
-        market_liquidities.add_liquidity_for(0, 4.125, 100).unwrap();
+        market_liquidities.add_liquidity_for(0, 3.0, 1000).unwrap();
+        market_liquidities.add_liquidity_for(0, 3.5, 1000).unwrap();
+        market_liquidities
+            .add_liquidity_for(0, 4.125, 1000)
+            .unwrap();
 
         assert_eq!(
-            vec!((0, 3.0, 100), (0, 3.5, 100), (0, 4.125, 100)),
+            vec!((0, 3.0, 1000), (0, 3.5, 1000), (0, 4.125, 1000)),
             liquidities(&market_liquidities.liquidities_for)
         );
 
@@ -124,7 +120,7 @@ mod test {
         .expect("update_market_liquidities_with_cross_liquidity failed");
 
         assert_eq!(
-            vec!((1, 1.5, 200), (1, 1.4, 250), (1, 1.32, 312)), // TODO deal with rounding on the last result
+            vec!((1, 1.5, 2000), (1, 1.4, 2500), (1, 1.32, 3125)),
             liquidities(&market_liquidities.liquidities_against)
         );
     }
@@ -161,7 +157,7 @@ mod test {
         .expect("update_market_liquidities_with_cross_liquidity failed");
 
         assert_eq!(
-            vec!((2, 6.0, 33), (2, 5.25, 40)), // TODO deal with rounding on the first result
+            vec!((2, 6.0, 33), (2, 5.25, 40)),
             liquidities(&market_liquidities.liquidities_against)
         );
     }
