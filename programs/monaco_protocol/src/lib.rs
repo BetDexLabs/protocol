@@ -98,6 +98,28 @@ pub mod monaco_protocol {
             .close(ctx.accounts.payer.to_account_info())
     }
 
+    pub fn cancel_order_request(
+        ctx: Context<CancelOrderRequest>,
+        distinct_seed: [u8; 16],
+    ) -> Result<()> {
+        let refund_amount = instructions::order_request::cancel_order_request(
+            &mut ctx.accounts.market,
+            &mut ctx.accounts.market_position,
+            &mut ctx.accounts.order_request_queue,
+            distinct_seed,
+        )?;
+
+        transfer::transfer_from_market_escrow(
+            &ctx.accounts.market_escrow,
+            &ctx.accounts.purchaser_token,
+            &ctx.accounts.token_program,
+            &ctx.accounts.market,
+            refund_amount,
+        )?;
+
+        Ok(())
+    }
+
     pub fn create_market_position(ctx: Context<CreateMarketPosition>) -> Result<()> {
         market_position::create_market_position(
             &ctx.accounts.purchaser.key(),

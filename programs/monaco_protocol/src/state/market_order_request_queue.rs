@@ -14,6 +14,14 @@ impl MarketOrderRequestQueue {
     pub const SIZE: usize = DISCRIMINATOR_SIZE +
         PUB_KEY_SIZE + // market
         OrderRequestQueue::size_for(MarketOrderRequestQueue::QUEUE_LENGTH); // order requests
+
+    pub fn find_order_request(&self, _distinct_seed: [u8; 16]) -> Option<OrderRequest> {
+        None // TODO
+    }
+
+    pub fn remove_order_request(&mut self, _distinct_seed: [u8; 16]) -> Option<OrderRequest> {
+        None // TODO
+    }
 }
 
 #[derive(AnchorSerialize, AnchorDeserialize, Clone, Copy, Debug, Default)]

@@ -94,6 +94,50 @@ pub struct CreateOrderRequest<'info> {
 }
 
 #[derive(Accounts)]
+#[instruction(distinct_seed: [u8; 16])]
+pub struct CancelOrderRequest<'info> {
+    #[account(mut)]
+    pub market: Box<Account<'info, Market>>,
+    #[account(
+        mut,
+        token::mint = market.mint_account,
+        token::authority = market_escrow,
+        seeds = [b"escrow".as_ref(), market.key().as_ref()],
+        bump,
+    )]
+    pub market_escrow: Account<'info, TokenAccount>,
+    #[account(
+        mut,
+        has_one = market @ CoreError::CancelationMarketMismatch,
+    )]
+    pub order_request_queue: Account<'info, MarketOrderRequestQueue>,
+
+    #[account(
+        mut,
+        address = order_request_queue
+            .find_order_request(distinct_seed)
+            .ok_or(CoreError::CancelationPurchaserMismatch)?
+            .purchaser @ CoreError::CancelationPurchaserMismatch
+    )]
+    pub purchaser: Signer<'info>,
+    #[account(
+        mut,
+        associated_token::mint = market.mint_account,
+        associated_token::authority = purchaser,
+    )]
+    pub purchaser_token: Account<'info, TokenAccount>,
+    #[account(
+        mut,
+        has_one = market @ CoreError::CancelationMarketMismatch,
+        has_one = purchaser @ CoreError::CancelationPurchaserMismatch,
+    )]
+    pub market_position: Box<Account<'info, MarketPosition>>,
+
+    #[account(address = anchor_spl::token::ID)]
+    pub token_program: Program<'info, Token>,
+}
+
+#[derive(Accounts)]
 pub struct CreateMarketPosition<'info> {
     #[account(
         init,
@@ -294,12 +338,6 @@ pub struct CancelOrder<'info> {
         has_one = market @ CoreError::CancelationMarketLiquiditiesMismatch,
     )]
     pub market_liquidities: Account<'info, MarketLiquidities>,
-    #[account(
-        mut,
-        has_one = market @ CoreError::CancelationMarketOutcomeMismatch,
-        constraint = market_outcome.index == order.market_outcome_index @ CoreError::CancelationMarketOutcomeMismatch,
-    )]
-    pub market_outcome: Account<'info, MarketOutcome>,
     #[account(has_one = market)]
     pub market_matching_queue: Account<'info, MarketMatchingQueue>,
     #[account(
