@@ -35,7 +35,6 @@ pub fn on_order_creation(
             }
 
             let stake_matched = liquidity.liquidity.min(order.stake_unmatched);
-
             if liquidity.sources.is_empty() {
                 // direct match
 
@@ -122,7 +121,6 @@ pub fn on_order_creation(
             }
 
             let stake_matched = liquidity.liquidity.min(order.stake_unmatched);
-
             if liquidity.sources.is_empty() {
                 // direct match
 
