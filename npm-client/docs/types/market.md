@@ -112,11 +112,11 @@ Type: {front: [number][44], len: [number][44], items: [Array][47]<[MarketMatchin
 
 ## MarketMatchingQueueOrderMatch
 
-Type: {pk: PublicKey, forOutcome: [boolean][46], outcomeIndex: [number][44], price: [number][44], stake: [number][44]}
+Type: {pk: PublicKey?, forOutcome: [boolean][46], outcomeIndex: [number][44], price: [number][44], stake: [number][44]}
 
 ### Properties
 
-*   `pk` **PublicKey**&#x20;
+*   `pk` **PublicKey?**&#x20;
 *   `forOutcome` **[boolean][46]**&#x20;
 *   `outcomeIndex` **[number][44]**&#x20;
 *   `price` **[number][44]**&#x20;
@@ -192,7 +192,7 @@ Type: {outcomeIndex: [string][45], price: [string][45], forOutcome: [string][45]
 
 ## MarketOutcomeAccount
 
-Type: {index: [number][44], title: [string][45], market: PublicKey, latestMatchedPrice: [number][44], matchedTotal: BN, prices: PublicKey, priceLadder: [Array][47]<[number][44]>}
+Type: {index: [number][44], title: [string][45], market: PublicKey, latestMatchedPrice: [number][44], matchedTotal: BN, prices: (PublicKey | null), priceLadder: [Array][47]<[number][44]>}
 
 ### Properties
 
@@ -201,7 +201,7 @@ Type: {index: [number][44], title: [string][45], market: PublicKey, latestMatche
 *   `market` **PublicKey**&#x20;
 *   `latestMatchedPrice` **[number][44]**&#x20;
 *   `matchedTotal` **BN**&#x20;
-*   `prices` **PublicKey**&#x20;
+*   `prices` **(PublicKey | null)**&#x20;
 *   `priceLadder` **[Array][47]<[number][44]>**&#x20;
 
 ## MarketOutcomeAccounts

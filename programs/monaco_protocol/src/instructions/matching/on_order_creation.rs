@@ -6,7 +6,7 @@ use crate::state::market_matching_queue_account::*;
 use crate::state::order_account::*;
 use anchor_lang::prelude::*;
 
-pub const MATCH_CAPACITY: usize = 8_usize;
+pub const MATCH_CAPACITY: usize = 8_usize; // an arbitrary number
 
 pub fn on_order_creation(
     market_liquidities: &mut MarketLiquidities,
@@ -38,7 +38,6 @@ pub fn on_order_creation(
             }
 
             let stake_matched = liquidity.liquidity.min(order.stake_unmatched);
-
             if liquidity.sources.is_empty() {
                 // straight match
                 market_matching_queue
@@ -137,7 +136,6 @@ pub fn on_order_creation(
             }
 
             let stake_matched = liquidity.liquidity.min(order.stake_unmatched);
-
             if liquidity.sources.is_empty() {
                 // straight match
                 market_matching_queue
