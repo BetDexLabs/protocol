@@ -493,13 +493,16 @@ pub struct ProcessOrderMatchTaker<'info> {
     #[account(
         mut,
         has_one = market @ CoreError::MatchingMarketMismatch,
+        constraint = !market_matching_queue.matches.is_empty()
+            @ CoreError::MatchingQueueIsEmpty,
     )]
     pub market_matching_queue: Box<Account<'info, MarketMatchingQueue>>,
 
     #[account(
         mut,
         has_one = market @ CoreError::MatchingMarketMismatch,
-        constraint = taker_order_constraint(&market_matching_queue, &order) @ CoreError::MatchingPoolHeadMismatch,
+        constraint = taker_order_constraint(&market_matching_queue, &order)
+            @ CoreError::MatchingPoolHeadMismatch,
     )]
     pub order: Account<'info, Order>,
     #[account(
@@ -563,7 +566,8 @@ pub struct ProcessOrderMatchMaker<'info> {
     #[account(
         mut,
         has_one = market @ CoreError::MatchingMarketMismatch,
-        constraint = !market_matching_queue.matches.is_empty() @ CoreError::MatchingQueueIsEmpty,
+        constraint = !market_matching_queue.matches.is_empty()
+            @ CoreError::MatchingQueueIsEmpty,
     )]
     pub market_matching_queue: Box<Account<'info, MarketMatchingQueue>>,
 
@@ -584,7 +588,8 @@ pub struct ProcessOrderMatchMaker<'info> {
     #[account(
         mut,
         has_one = market @ CoreError::MatchingMarketMismatch,
-        constraint = market_position.purchaser == order.purchaser @ CoreError::MatchingPurchaserMismatch,
+        constraint = market_position.purchaser == order.purchaser
+            @ CoreError::MatchingPurchaserMismatch,
     )]
     pub market_position: Box<Account<'info, MarketPosition>>,
     #[account(
