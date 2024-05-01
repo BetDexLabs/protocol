@@ -27,7 +27,7 @@ pub fn on_order_match_taker(
     let now = current_timestamp();
 
     match market_matching_queue.matches.peek_mut() {
-        None => Err(error!(CoreError::MatchingMatchingQueueEmpty)),
+        None => Err(error!(CoreError::MatchingQueueIsEmpty)),
         Some(order_match) => {
             let matched_stake = order_match.stake;
             let matched_price = order_match.price;
@@ -74,7 +74,7 @@ pub fn on_order_match_maker(
     let now = current_timestamp();
 
     match market_matching_queue.matches.peek_mut() {
-        None => Err(error!(CoreError::MatchingMatchingQueueEmpty)),
+        None => Err(error!(CoreError::MatchingQueueIsEmpty)),
         Some(order_match) => {
             let matched_stake = order.stake_unmatched.min(order_match.stake);
             let matched_price = order_match.price;
@@ -216,7 +216,7 @@ mod test {
         );
         assert!(on_order_match_testable_result.is_err());
         assert_eq!(
-            error!(CoreError::MatchingMatchingQueueEmpty),
+            error!(CoreError::MatchingQueueIsEmpty),
             on_order_match_testable_result.unwrap_err()
         );
 
