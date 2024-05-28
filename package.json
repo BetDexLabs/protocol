@@ -54,6 +54,7 @@
     "lockMarket": "ts-node admin/client.ts lockMarket",
     "voidMarket": "ts-node admin/client.ts void_market",
     "getAllOrders": "ts-node admin/client.ts getAllOrders",
+    "closeMarket": "ts-node admin/client.ts close_market",
     "printOrder": "ts-node admin/client.ts print_order",
     "createOrder": "ts-node admin/client.ts create_order",
     "authoriseOperator": "ts-node admin/client.ts authorise_operator",
