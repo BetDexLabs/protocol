@@ -6,9 +6,10 @@ import {
 import { AnchorProvider, BN, Program, web3 } from "@coral-xyz/anchor";
 import { Mint, getMint } from "@solana/spl-token";
 import { Big } from "big.js";
-import { findOrderRequestQueuePda, getMarket } from "./markets";
+import { getMarket } from "./markets";
 import { findMarketPositionPda } from "./market_position";
 import { findMarketMatchingPoolPda } from "./market_matching_pools";
+import { findMarketOrderRequestQueuePda } from "./market_order_request_queues";
 import { findMarketOutcomePda } from "./market_outcomes";
 import {
   ClientResponse,
@@ -19,6 +20,7 @@ import {
   SignAndSendInstructionsBatchResponse,
   MarketAccountsForCreateOrder,
 } from "../types";
+import { v4 as uuid } from "uuid";
 
 /**
  * For the provided market, outcome, price and forOutcome condition - return all the necessary PDAs and account information required for order creation.
@@ -72,7 +74,7 @@ export async function getMarketAccounts(
     ),
     findMarketPositionPda(program, marketPk, provider.wallet.publicKey),
     findEscrowPda(program, marketPk),
-    findOrderRequestQueuePda(program, marketPk),
+    findMarketOrderRequestQueuePda(program, marketPk),
   ]);
 
   const responseData = {
@@ -344,4 +346,15 @@ export async function confirmTransaction(
     response.addError(e);
   }
   return response.body;
+}
+
+/**
+ * Return a new seed 16 bytes long as Uint8Array
+ *
+ * @returns {Uint8Array}
+ */
+export function randomSeed16(): Uint8Array {
+  const buffer = new Uint8Array(16);
+  uuid(null, buffer, 0);
+  return buffer;
 }

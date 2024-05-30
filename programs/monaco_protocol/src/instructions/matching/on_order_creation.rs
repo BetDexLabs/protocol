@@ -91,6 +91,7 @@ pub fn on_order_creation(
             market_liquidities
                 .remove_liquidity_against(order.market_outcome_index, *price, *stake)
                 .map_err(|_| CoreError::MatchingRemainingLiquidityTooSmall)?;
+            market_liquidities.update_stake_matched_total(*stake)?;
         }
 
         // remainder is added to liquidities
@@ -177,6 +178,7 @@ pub fn on_order_creation(
             market_liquidities
                 .remove_liquidity_for(order.market_outcome_index, *price, *stake)
                 .map_err(|_| CoreError::MatchingRemainingLiquidityTooSmall)?;
+            market_liquidities.update_stake_matched_total(*stake)?;
         }
 
         // remainder is added to liquidities
@@ -194,7 +196,7 @@ pub fn on_order_creation(
 
 #[cfg(test)]
 mod test {
-    use crate::state::market_liquidities::MarketOutcomePriceLiquidity;
+    use crate::state::market_liquidities::{mock_market_liquidities, MarketOutcomePriceLiquidity};
     use crate::state::market_matching_queue_account::MatchingQueue;
 
     use super::*;
@@ -288,6 +290,7 @@ mod test {
             vec!((1.8, 20)),
             liquidities(&market_liquidities.liquidities_against)
         );
+        assert_eq!(80_u64, market_liquidities.stake_matched_total);
         assert_eq!(
             vec!(
                 (1.2, 10),
@@ -353,6 +356,7 @@ mod test {
             vec!((1.1, 100)),
             liquidities(&market_liquidities.liquidities_against)
         );
+        assert_eq!(0_u64, market_liquidities.stake_matched_total);
         assert_eq!(
             Vec::<(f64, u64)>::new(),
             matches(&market_matching_queue.matches)
@@ -449,6 +453,7 @@ mod test {
             vec!((1.3, 80)),
             liquidities(&market_liquidities.liquidities_against)
         );
+        assert_eq!(20_u64, market_liquidities.stake_matched_total);
         assert_eq!(
             vec!((1.2, 10), (1.2, 10), (1.3, 10), (1.3, 10)),
             matches(&market_matching_queue.matches)
@@ -497,6 +502,7 @@ mod test {
             vec!((1.4, 70)),
             liquidities(&market_liquidities.liquidities_against)
         );
+        assert_eq!(30_u64, market_liquidities.stake_matched_total);
         assert_eq!(
             vec!(
                 (1.2, 10),
@@ -552,6 +558,7 @@ mod test {
             vec!((1.5, 70)),
             liquidities(&market_liquidities.liquidities_against)
         );
+        assert_eq!(30_u64, market_liquidities.stake_matched_total);
         assert_eq!(
             vec!(
                 (1.2, 10),
@@ -655,6 +662,7 @@ mod test {
             Vec::<(f64, u64)>::new(),
             liquidities(&market_liquidities.liquidities_against)
         );
+        assert_eq!(60_u64, market_liquidities.stake_matched_total);
         assert_eq!(
             vec!(
                 (1.7, 10),
@@ -716,6 +724,7 @@ mod test {
             Vec::<(f64, u64)>::new(),
             liquidities(&market_liquidities.liquidities_against)
         );
+        assert_eq!(30_u64, market_liquidities.stake_matched_total);
         assert_eq!(
             vec!(
                 (1.4, 10),
@@ -771,6 +780,7 @@ mod test {
             Vec::<(f64, u64)>::new(),
             liquidities(&market_liquidities.liquidities_against)
         );
+        assert_eq!(30_u64, market_liquidities.stake_matched_total);
         assert_eq!(
             vec!(
                 (1.4, 10),
@@ -826,6 +836,7 @@ mod test {
             vec!((1.2, 10)),
             liquidities(&market_liquidities.liquidities_against)
         );
+        assert_eq!(20_u64, market_liquidities.stake_matched_total);
         assert_eq!(
             vec!((1.4, 10), (1.4, 10), (1.3, 10), (1.3, 10),),
             matches(&market_matching_queue.matches)
@@ -922,6 +933,7 @@ mod test {
             vec!((1.4, 10), (1.3, 10), (1.2, 10)),
             liquidities(&market_liquidities.liquidities_against)
         );
+        assert_eq!(0_u64, market_liquidities.stake_matched_total);
         assert_eq!(
             Vec::<(f64, u64)>::new(),
             matches(&market_matching_queue.matches)
@@ -929,14 +941,6 @@ mod test {
 
         assert_eq!(100_u64, order.stake_unmatched);
         assert_eq!(0_u64, order.payout);
-    }
-
-    fn mock_market_liquidities(market: Pubkey) -> MarketLiquidities {
-        MarketLiquidities {
-            market,
-            liquidities_for: vec![],
-            liquidities_against: vec![],
-        }
     }
 
     fn liquidities(liquidities: &Vec<MarketOutcomePriceLiquidity>) -> Vec<(f64, u64)> {

@@ -10,6 +10,7 @@ use crate::state::type_size::*;
 #[account]
 pub struct MarketLiquidities {
     pub market: Pubkey,
+    pub stake_matched_total: u64,
     pub liquidities_for: Vec<MarketOutcomePriceLiquidity>,
     pub liquidities_against: Vec<MarketOutcomePriceLiquidity>,
 }
@@ -18,6 +19,7 @@ impl MarketLiquidities {
     const LIQUIDITIES_VEC_LENGTH: usize = 30_usize;
     pub const SIZE: usize = DISCRIMINATOR_SIZE
         + PUB_KEY_SIZE // market
+        + U64_SIZE // stake_matched_total
         + vec_size(MarketOutcomePriceLiquidity::SIZE, MarketLiquidities::LIQUIDITIES_VEC_LENGTH) // for
         + vec_size(MarketOutcomePriceLiquidity::SIZE, MarketLiquidities::LIQUIDITIES_VEC_LENGTH); // against
 
@@ -93,7 +95,7 @@ impl MarketLiquidities {
                 liquidities_for_value.liquidity = liquidities_for_value
                     .liquidity
                     .checked_add(liquidity)
-                    .ok_or(CoreError::MarketOutcomeUpdateError)?
+                    .ok_or(CoreError::MarketLiquiditiesUpdateError)?
             }
             Err(index) => {
                 if is_full {
@@ -141,14 +143,14 @@ impl MarketLiquidities {
                 liquidities_for_value.liquidity = liquidities_for_value
                     .liquidity
                     .checked_sub(liquidity)
-                    .ok_or(CoreError::MarketOutcomeUpdateError)?;
+                    .ok_or(CoreError::MarketLiquiditiesUpdateError)?;
 
                 if liquidities_for_value.liquidity == 0 {
                     liquidities.remove(index);
                 }
                 Ok(())
             }
-            Err(_) => Err(error!(CoreError::MarketOutcomeUpdateError)),
+            Err(_) => Err(error!(CoreError::MarketLiquiditiesUpdateError)),
         }
     }
 
@@ -196,6 +198,16 @@ impl MarketLiquidities {
         }
     }
 
+    pub fn update_stake_matched_total(&mut self, stake_matched: u64) -> Result<()> {
+        if stake_matched > 0_u64 {
+            self.stake_matched_total = self
+                .stake_matched_total
+                .checked_add(stake_matched)
+                .ok_or(CoreError::MarketLiquiditiesUpdateError)?;
+        }
+        Ok(())
+    }
+
     pub fn move_to_inplay(&mut self, market_event_start_order_behaviour: &MarketOrderBehaviour) {
         // Reset liquidities when market moves to inplay if that's the desired behaviour
         if market_event_start_order_behaviour.eq(&MarketOrderBehaviour::CancelUnmatched) {
@@ -232,6 +244,7 @@ pub fn mock_market_liquidities(market_pk: Pubkey) -> MarketLiquidities {
         market: market_pk,
         liquidities_for: Vec::new(),
         liquidities_against: Vec::new(),
+        stake_matched_total: 0_u64,
     }
 }
 
@@ -334,6 +347,7 @@ mod total_exposure_tests {
                 mock_liquidity(1, 2.111, 2001),
                 mock_liquidity(0, 2.111, 1001),
             ],
+            stake_matched_total: 0_u64,
         };
 
         market_liquidities
@@ -385,6 +399,7 @@ mod total_exposure_tests {
                 mock_liquidity(0, 2.33, 1004),
             ],
             liquidities_against: vec![],
+            stake_matched_total: 0_u64,
         };
 
         assert_eq!(
@@ -415,6 +430,7 @@ mod total_exposure_tests {
                 mock_liquidity(0, 2.31, 1002),
                 mock_liquidity(0, 2.30, 1001),
             ],
+            stake_matched_total: 0_u64,
         };
 
         assert_eq!(
@@ -432,5 +448,31 @@ mod total_exposure_tests {
                 .unwrap()
                 .liquidity
         );
+    }
+}
+
+#[cfg(test)]
+mod update_stake_matched_total_tests {
+    use super::*;
+
+    #[test]
+    fn test_on_match() {
+        let market_pk = Pubkey::new_unique();
+        let mut market_liquidities = mock_market_liquidities(market_pk);
+
+        let result_1 = market_liquidities.update_stake_matched_total(0);
+
+        assert!(result_1.is_ok());
+        assert_eq!(market_liquidities.stake_matched_total, 0);
+
+        let result_2 = market_liquidities.update_stake_matched_total(1);
+
+        assert!(result_2.is_ok());
+        assert_eq!(market_liquidities.stake_matched_total, 1);
+
+        let result_3 = market_liquidities.update_stake_matched_total(u64::MAX);
+
+        assert!(result_3.is_err());
+        assert_eq!(market_liquidities.stake_matched_total, 1);
     }
 }
