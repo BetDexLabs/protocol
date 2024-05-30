@@ -52,26 +52,6 @@ export type MarketAccounts = {
   markets: GetAccount<MarketAccount>[];
 };
 
-export type MarketMatchingQueueAccount = {
-  market: PublicKey;
-  matches: MarketMatchingQueue;
-};
-
-export type MarketMatchingQueue = {
-  front: number;
-  len: number;
-  items: MarketMatchingQueueOrderMatch[];
-};
-
-export type MarketMatchingQueueOrderMatch = {
-  pk?: PublicKey;
-
-  forOutcome: boolean;
-  outcomeIndex: number;
-  price: number;
-  stake: number;
-};
-
 export type MarketMatchingPoolAccount = {
   market: PublicKey;
   inplay: boolean;
@@ -120,7 +100,9 @@ export type MarketOutcomeAccount = {
   index: number;
   title: string;
   market: PublicKey;
+  /** @deprecated discontinued */
   latestMatchedPrice: number;
+  /** @deprecated discontinued */
   matchedTotal: BN;
   prices: PublicKey | null;
   priceLadder: number[];
@@ -164,18 +146,3 @@ export type MarketPricesAndPendingOrders = {
 } & MarketOutcomeAccounts &
   MarketPrices &
   PendingOrders;
-
-export type MarketPaymentsQueueAccount = {
-  market: PublicKey;
-  paymentQueue: {
-    front: number;
-    len: number;
-    items: PaymentInfo[];
-  };
-};
-
-export type PaymentInfo = {
-  from: PublicKey;
-  to: PublicKey;
-  amount: BN;
-};

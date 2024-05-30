@@ -11,9 +11,7 @@
 
 ## findTradePda
 
-For the provided order PublicKey return a Program Derived Address (PDA) and the seed used.
-If a seed override is provided, it will be used instead of generating new one.
-This PDA can be used for trade creation.
+For a given order PublicKey return a Program Derived Address (PDA) and the seed used. If a seed override is provided, it will be used instead of generating a new one. This PDA can be used for trade creation.
 
 ### Parameters
 
@@ -38,7 +36,7 @@ Returns **TradePdaResponse** publicKey (PDA) and the seed used to generate it
 
 ## getTrade
 
-For the provided trade publicKey, get the trade account.
+For the provided trade PublicKey, get the trade account.
 
 ### Parameters
 
