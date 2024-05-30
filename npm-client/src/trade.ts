@@ -1,14 +1,16 @@
 import { PublicKey } from "@solana/web3.js";
 import { Program } from "@coral-xyz/anchor";
-import { Trade, TradePdaResponse } from "../types/trade";
-import { ClientResponse, ResponseFactory } from "../types/client";
-import { GetAccount } from "../types/get_account";
-import { v4 as uuid } from "uuid";
+import {
+  ClientResponse,
+  GetAccount,
+  ResponseFactory,
+  Trade,
+  TradePdaResponse,
+} from "../types";
+import { randomSeed16 } from "./utils";
 
 /**
- * For the provided order PublicKey return a Program Derived Address (PDA) and the seed used.
- * If a seed override is provided, it will be used instead of generating new one.
- * This PDA can be used for trade creation.
+ * For a given order PublicKey return a Program Derived Address (PDA) and the seed used. If a seed override is provided, it will be used instead of generating a new one. This PDA can be used for trade creation.
  *
  * @param program {program} anchor program initialized by the consuming client
  * @param orderPk {PublicKey} publicKey of the order
@@ -33,9 +35,7 @@ export async function findTradePda(
 ): Promise<ClientResponse<TradePdaResponse>> {
   const response = new ResponseFactory({} as TradePdaResponse);
 
-  const distinctSeed = existingTradeSeed
-    ? existingTradeSeed
-    : newUuidAsByteArray();
+  const distinctSeed = existingTradeSeed ? existingTradeSeed : randomSeed16();
 
   try {
     const [tradePk, _] = PublicKey.findProgramAddressSync(
@@ -55,18 +55,7 @@ export async function findTradePda(
 }
 
 /**
- * Return a new UUID as Uint8Array to be used as a unique seed for a trade PDA
- *
- * @returns {Uint8Array}
- */
-function newUuidAsByteArray(): Uint8Array {
-  const buffer = new Uint8Array(16);
-  uuid(null, buffer, 0);
-  return buffer;
-}
-
-/**
- * For the provided trade publicKey, get the trade account.
+ * For the provided trade PublicKey, get the trade account.
  *
  * @param program {program} anchor program initialized by the consuming client
  * @param tradePk {PublicKey} publicKey of a trade
