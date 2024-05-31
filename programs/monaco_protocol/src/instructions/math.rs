@@ -5,7 +5,7 @@ use rust_decimal::Decimal;
 use std::ops::{Div, Mul, Sub};
 
 /// Converts at most precision 3 float to an equivalent Decimal - e.g., converting price (f64) to Decimal
-pub fn price_to_decimal(price: f64) -> Decimal {
+fn price_to_decimal(price: f64) -> Decimal {
     let mut decimal = Decimal::from_f64(price).unwrap();
     decimal.rescale(3);
     decimal
