@@ -63,7 +63,6 @@ mod tests {
     use super::*;
     use crate::state::market_account::{MarketOrderBehaviour, MarketStatus};
     use crate::state::order_account::mock_order;
-
     use anchor_lang::prelude::Pubkey;
     use solana_program::clock::UnixTimestamp;
 
