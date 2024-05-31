@@ -1,5 +1,4 @@
-use crate::instructions::calculate_stake_cross;
-use crate::instructions::market_liquidities::calculate_cross_price::CrossPriceCalculator;
+use crate::instructions::{calculate_price_cross, calculate_stake_cross};
 use crate::state::market_liquidities::{LiquidityKey, MarketLiquidities};
 use anchor_lang::prelude::*;
 
@@ -9,13 +8,13 @@ pub fn update_market_liquidities_with_cross_liquidity(
     source_liquidities: Vec<LiquidityKey>,
     cross_liquidity: LiquidityKey,
 ) -> Result<()> {
-    // calculate price based on provided
-    let mut cross_price_calculator = CrossPriceCalculator::new(source_liquidities.len() + 1);
-    source_liquidities
+    // calculate price based on provided inputs
+    let source_prices = source_liquidities
         .iter()
-        .for_each(|source_liquidity| cross_price_calculator.add(source_liquidity.price));
+        .map(|source_liquidity| source_liquidity.price)
+        .collect::<Vec<f64>>();
 
-    match cross_price_calculator.result() {
+    match calculate_price_cross(&source_prices) {
         Some(cross_price) => {
             // provided cross_liquidity.price is valid
             if cross_price == cross_liquidity.price {

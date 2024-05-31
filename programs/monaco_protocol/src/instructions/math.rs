@@ -40,6 +40,46 @@ pub fn calculate_stake_cross(stake: u64, price: f64, price_cross: f64) -> u64 {
     stake_cross_decimal.to_u64().unwrap()
 }
 
+/// 2ways: price_cross = price_a / (price_a - 1)
+/// 3ways: price_cross = price_ab / (price_ab - price_a - price_b)
+/// 4ways: price_cross = price_abc / (price_abc - price_ab - price_bc - price_ac)
+pub fn calculate_price_cross(prices: &[f64]) -> Option<f64> {
+    let mut full = Decimal::ONE;
+    let mut partials = vec![Decimal::ONE; prices.len()];
+
+    for (price_index, price) in prices.iter().enumerate() {
+        let price_decimal = price_to_decimal(*price);
+
+        full = full.mul(price_decimal);
+        for (index, partial) in partials.iter_mut().enumerate() {
+            if index != price_index {
+                *partial = partial.mul(price_decimal);
+            }
+        }
+    }
+
+    let mut sub;
+
+    // 2-way market goes differently
+    if partials.is_empty() {
+        sub = full.sub(&Decimal::ONE);
+    } else {
+        sub = full;
+        for partial in partials.iter() {
+            sub = sub.sub(partial);
+        }
+    }
+
+    let result = full.div(sub);
+    let result_truncated = result.trunc_with_scale(3);
+
+    if result.ne(&result_truncated) {
+        None // it needs to fit in 3 decimals
+    } else {
+        result_truncated.to_f64()
+    }
+}
+
 pub fn price_precision_is_within_range(price: f64) -> Result<()> {
     let decimal = Decimal::from_f64(price).ok_or(CoreError::ArithmeticError)?;
     let decimal_with_scale = decimal.trunc_with_scale(3);
@@ -118,6 +158,25 @@ mod tests {
         assert_eq!(calculate_for_payout(10000, 3.22), 32200);
         assert_eq!(calculate_for_payout(10000, 3.44), 34400);
         assert_eq!(calculate_for_payout(10000, 3.66), 36600);
+    }
+
+    #[test]
+    fn test_calculate_price_cross() {
+        let cross_price_2way = calculate_price_cross(&vec![3.0_f64]);
+        assert!(cross_price_2way.is_some());
+        assert_eq!(1.5_f64, cross_price_2way.unwrap());
+
+        assert!(calculate_price_cross(&vec![3.1_f64]).is_none());
+
+        let cross_price_3way = calculate_price_cross(&vec![2.0_f64, 3.0_f64]);
+        assert!(cross_price_3way.is_some());
+        assert_eq!(6.0_f64, cross_price_3way.unwrap());
+
+        let cross_price_4way_1 = calculate_price_cross(&vec![4.0_f64, 4.0_f64, 4.0_f64]);
+        assert!(cross_price_4way_1.is_some());
+        assert_eq!(4.0_f64, cross_price_4way_1.unwrap());
+
+        assert!(calculate_price_cross(&vec![4.0_f64, 4.0_f64, 5.0_f64]).is_none());
     }
 
     #[test]
