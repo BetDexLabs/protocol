@@ -1,9 +1,8 @@
-use std::ops::{Div, Mul, Sub};
-
 use crate::error::CoreError;
 use anchor_lang::{require, Result};
-use rust_decimal::prelude::{FromPrimitive, One, ToPrimitive};
+use rust_decimal::prelude::*;
 use rust_decimal::Decimal;
+use std::ops::{Div, Mul, Sub};
 
 /// Converts at most precision 3 float to an equivalent Decimal - e.g., converting price (f64) to Decimal
 pub fn price_to_decimal(price: f64) -> Decimal {
@@ -57,20 +56,12 @@ pub fn calculate_price_cross(prices: &[f64]) -> Option<f64> {
             }
         }
     }
-
-    let mut sub;
-
-    // 2-way market goes differently
-    if partials.is_empty() {
-        sub = full.sub(&Decimal::ONE);
-    } else {
-        sub = full;
-        for partial in partials.iter() {
-            sub = sub.sub(partial);
-        }
+    let mut full_sub_partials = full;
+    for partial in partials {
+        full_sub_partials = full_sub_partials.sub(partial);
     }
 
-    let result = full.div(sub);
+    let result = full.div(full_sub_partials);
     let result_truncated = result.trunc_with_scale(3);
 
     if result.ne(&result_truncated) {
