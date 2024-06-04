@@ -60,6 +60,10 @@ describe("Market Liquidities", () => {
       monaco.program,
     );
     assert.equal(accounts.data.accounts.length, 1);
+    assert.equal(
+      accounts.data.accounts[0].publicKey.toBase58(),
+      market3.liquiditiesPk.toBase58(),
+    );
   });
 });
 
