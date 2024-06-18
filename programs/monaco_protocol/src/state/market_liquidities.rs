@@ -331,7 +331,7 @@ impl MarketLiquidities {
     }
 
     pub fn sources_ord(sources: &[LiquidityKey]) -> u16 {
-        sources.iter().map(|source| source.outcome + 1).sum()
+        sources.iter().map(|source| source.outcome).sum()
     }
 
     pub fn move_to_inplay(&mut self, market_event_start_order_behaviour: &MarketOrderBehaviour) {

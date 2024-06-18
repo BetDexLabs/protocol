@@ -329,7 +329,7 @@ mod test_match_for_order {
             liquidities(&market_liquidities.liquidities_for)
         );
         assert_eq!(
-            vec![(3.5, 5, 20)],
+            vec![(3.5, 3, 20)],
             liquidities2(&market_liquidities.liquidities_against)
         );
         assert_eq!(
