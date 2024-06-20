@@ -247,19 +247,13 @@ mod test_match_for_order {
 
         let mut market_liquidities = mock_market_liquidities(market_pk);
         market_liquidities
-            .add_liquidity_for_with_sources(
-                0,
-                3.5,
-                &vec![LiquidityKey::new(1, 2.8), LiquidityKey::new(2, 2.8)],
-                100,
-            )
-            .unwrap();
-        market_liquidities
             .add_liquidity_against(1, 2.8, 125)
             .unwrap();
         market_liquidities
             .add_liquidity_against(2, 2.8, 125)
             .unwrap();
+        market_liquidities
+            .update_cross_liquidity_for(&[LiquidityKey::new(1, 2.8), LiquidityKey::new(2, 2.8)]);
 
         let mut market_matching_queue = MarketMatchingQueue {
             market: market_pk,
@@ -300,16 +294,12 @@ mod test_match_for_order {
         let mut order = mock_order(market_pk, 0, true, 3.5, 80, payer_pk);
 
         let mut market_liquidities = mock_market_liquidities(market_pk);
-        market_liquidities
-            .add_liquidity_against_with_sources(
-                0,
-                3.5,
-                &vec![LiquidityKey::new(1, 2.8), LiquidityKey::new(2, 2.8)],
-                100,
-            )
-            .unwrap();
         market_liquidities.add_liquidity_for(1, 2.8, 125).unwrap();
         market_liquidities.add_liquidity_for(2, 2.8, 125).unwrap();
+        market_liquidities.update_cross_liquidity_against(&[
+            LiquidityKey::new(1, 2.8),
+            LiquidityKey::new(2, 2.8),
+        ]);
 
         let mut market_matching_queue = MarketMatchingQueue {
             market: market_pk,
@@ -350,21 +340,14 @@ mod test_match_for_order {
         let mut order = mock_order(market_pk, 0, true, 3.0, 120, payer_pk);
 
         let mut market_liquidities = mock_market_liquidities(market_pk);
-        market_liquidities
-            .add_liquidity_against_with_sources(
-                0,
-                3.0,
-                &vec![
-                    LiquidityKey::new(1, 3.6),
-                    LiquidityKey::new(2, 4.0),
-                    LiquidityKey::new(3, 7.2),
-                ],
-                240,
-            )
-            .unwrap();
         market_liquidities.add_liquidity_for(1, 3.6, 200).unwrap();
         market_liquidities.add_liquidity_for(2, 4.0, 180).unwrap();
         market_liquidities.add_liquidity_for(3, 7.2, 100).unwrap();
+        market_liquidities.update_cross_liquidity_against(&[
+            LiquidityKey::new(1, 3.6),
+            LiquidityKey::new(2, 4.0),
+            LiquidityKey::new(3, 7.2),
+        ]);
 
         let mut market_matching_queue = MarketMatchingQueue {
             market: market_pk,
@@ -420,16 +403,12 @@ mod test_match_against_order {
         let mut order = mock_order(market_pk, 1, false, 2.8, 100, payer_pk);
 
         let mut market_liquidities = mock_market_liquidities(market_pk);
-        market_liquidities
-            .add_liquidity_against_with_sources(
-                0,
-                3.5,
-                &vec![LiquidityKey::new(1, 2.8), LiquidityKey::new(2, 2.8)],
-                100,
-            )
-            .unwrap();
         market_liquidities.add_liquidity_for(1, 2.8, 125).unwrap();
         market_liquidities.add_liquidity_for(2, 2.8, 125).unwrap();
+        market_liquidities.update_cross_liquidity_against(&[
+            LiquidityKey::new(1, 2.8),
+            LiquidityKey::new(2, 2.8),
+        ]);
 
         let mut market_matching_queue = MarketMatchingQueue {
             market: market_pk,
@@ -471,19 +450,13 @@ mod test_match_against_order {
 
         let mut market_liquidities = mock_market_liquidities(market_pk);
         market_liquidities
-            .add_liquidity_for_with_sources(
-                0,
-                3.5,
-                &vec![LiquidityKey::new(1, 2.8), LiquidityKey::new(2, 2.8)],
-                100,
-            )
-            .unwrap();
-        market_liquidities
             .add_liquidity_against(1, 2.8, 125)
             .unwrap();
         market_liquidities
             .add_liquidity_against(2, 2.8, 125)
             .unwrap();
+        market_liquidities
+            .update_cross_liquidity_for(&[LiquidityKey::new(1, 2.8), LiquidityKey::new(2, 2.8)]);
 
         let mut market_matching_queue = MarketMatchingQueue {
             market: market_pk,

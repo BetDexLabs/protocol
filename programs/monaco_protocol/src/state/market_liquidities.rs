@@ -1,8 +1,9 @@
 use crate::error::CoreError;
-use crate::instructions::calculate_stake_cross;
+use crate::instructions::{calculate_price_cross, calculate_stake_cross};
 use crate::state::market_account::MarketOrderBehaviour;
 use crate::state::type_size::*;
 use anchor_lang::prelude::*;
+use rust_decimal::prelude::ToPrimitive;
 use std::cmp::Ordering;
 use std::string::ToString;
 
@@ -44,7 +45,7 @@ impl MarketLiquidities {
         price: f64,
     ) -> Option<&MarketOutcomePriceLiquidity> {
         self.liquidities_for
-            .binary_search_by(Self::sorter_for(outcome, price, 0))
+            .binary_search_by(Self::sorter_for(outcome, price, &[]))
             .ok()
             .map(|index| &self.liquidities_for[index])
     }
@@ -55,27 +56,18 @@ impl MarketLiquidities {
         price: f64,
     ) -> Option<&MarketOutcomePriceLiquidity> {
         self.liquidities_against
-            .binary_search_by(Self::sorter_against(outcome, price, 0))
+            .binary_search_by(Self::sorter_against(outcome, price, &[]))
             .ok()
             .map(|index| &self.liquidities_against[index])
     }
 
     pub fn add_liquidity_for(&mut self, outcome: u16, price: f64, liquidity: u64) -> Result<()> {
-        self.add_liquidity_for_with_sources(outcome, price, &[], liquidity)
-    }
-
-    pub fn add_liquidity_for_with_sources(
-        &mut self,
-        outcome: u16,
-        price: f64,
-        sources: &[LiquidityKey],
-        liquidity: u64,
-    ) -> Result<()> {
         let is_full = self.is_full();
         let liquidities = &mut self.liquidities_for;
+        let sources = &[];
         Self::add_liquidity(
             liquidities,
-            Self::sorter_for(outcome, price, Self::sources_ord(sources)),
+            Self::sorter_for(outcome, price, sources),
             outcome,
             price,
             sources,
@@ -90,21 +82,12 @@ impl MarketLiquidities {
         price: f64,
         liquidity: u64,
     ) -> Result<()> {
-        self.add_liquidity_against_with_sources(outcome, price, &[], liquidity)
-    }
-
-    pub fn add_liquidity_against_with_sources(
-        &mut self,
-        outcome: u16,
-        price: f64,
-        sources: &[LiquidityKey],
-        liquidity: u64,
-    ) -> Result<()> {
         let is_full = self.is_full();
         let liquidities = &mut self.liquidities_against;
+        let sources = &[];
         Self::add_liquidity(
             liquidities,
-            Self::sorter_against(outcome, price, Self::sources_ord(sources)),
+            Self::sorter_against(outcome, price, sources),
             outcome,
             price,
             sources,
@@ -150,31 +133,72 @@ impl MarketLiquidities {
         Ok(())
     }
 
-    pub fn update_cross_liquidity_for(&mut self, outcome: u16, price: f64) {
-        let _ = self
-            .get_liquidity_for(outcome, price)
-            .map(|liquidity| {
-                liquidity
-                    .sources
-                    .iter()
-                    .map(|source_liquidity_key| {
-                        let source_liquidity = self.get_liquidity_against(
-                            source_liquidity_key.outcome,
-                            source_liquidity_key.price,
-                        );
+    pub fn update_cross_liquidity_for(&mut self, sources: &[LiquidityKey]) {
+        // silly way of detecting which outcome is supposed to be updated
+        // sum of all the outcomes minus sum of all provided ones equals the one we want
+        let outcome_count = sources.len().to_u16().unwrap();
+        let outcome = (0_u16..=outcome_count).sum::<u16>() - Self::sources_ord(sources);
 
-                        calculate_stake_cross(
-                            source_liquidity
-                                .map(|source_liquidity| source_liquidity.liquidity)
-                                .unwrap_or(0_u64),
-                            source_liquidity_key.price,
-                            price,
-                        )
-                    })
-                    .min()
-                    .unwrap_or(0_u64)
-            })
-            .unwrap_or(0_u64);
+        let source_prices = sources
+            .iter()
+            .map(|source| source.price)
+            .collect::<Vec<f64>>();
+        if let Some(cross_price) = calculate_price_cross(&source_prices) {
+            let cross_liquidity = sources
+                .iter()
+                .map(|source_liquidity_key| {
+                    let source_liquidity = self.get_liquidity_against(
+                        source_liquidity_key.outcome,
+                        source_liquidity_key.price,
+                    );
+
+                    calculate_stake_cross(
+                        source_liquidity
+                            .map(|source_liquidity| source_liquidity.liquidity)
+                            .unwrap_or(0_u64),
+                        source_liquidity_key.price,
+                        cross_price,
+                    )
+                })
+                .min()
+                .unwrap_or(0_u64);
+
+            self.set_liquidity_for(outcome, cross_price, cross_liquidity, sources);
+        }
+    }
+
+    pub fn update_cross_liquidity_against(&mut self, sources: &[LiquidityKey]) {
+        // silly way of detecting which outcome is supposed to be updated
+        // sum of all the outcomes minus sum of all provided ones equals the one we want
+        let outcome_count = sources.len().to_u16().unwrap();
+        let outcome = (0_u16..=outcome_count).sum::<u16>() - Self::sources_ord(sources);
+
+        let source_prices = sources
+            .iter()
+            .map(|source| source.price)
+            .collect::<Vec<f64>>();
+        if let Some(cross_price) = calculate_price_cross(&source_prices) {
+            let cross_liquidity = sources
+                .iter()
+                .map(|source_liquidity_key| {
+                    let source_liquidity = self.get_liquidity_for(
+                        source_liquidity_key.outcome,
+                        source_liquidity_key.price,
+                    );
+
+                    calculate_stake_cross(
+                        source_liquidity
+                            .map(|source_liquidity| source_liquidity.liquidity)
+                            .unwrap_or(0_u64),
+                        source_liquidity_key.price,
+                        cross_price,
+                    )
+                })
+                .min()
+                .unwrap_or(0_u64);
+
+            self.set_liquidity_against(outcome, cross_price, cross_liquidity, sources);
+        }
     }
 
     pub fn set_liquidity_for(
@@ -182,17 +206,16 @@ impl MarketLiquidities {
         outcome: u16,
         price: f64,
         liquidity: u64,
-        sources: Vec<LiquidityKey>,
+        sources: &[LiquidityKey],
     ) {
-        let sources_ord = sources.iter().map(|source| source.outcome + 1).sum();
-        let sorter = Self::sorter_for(outcome, price, sources_ord);
+        let sorter = Self::sorter_for(outcome, price, sources);
         Self::set_liquidity(
             &mut self.liquidities_for,
             sorter,
             outcome,
             price,
             liquidity,
-            sources.clone(),
+            sources.to_vec(),
         )
     }
 
@@ -201,17 +224,16 @@ impl MarketLiquidities {
         outcome: u16,
         price: f64,
         liquidity: u64,
-        sources: Vec<LiquidityKey>,
+        sources: &[LiquidityKey],
     ) {
-        let sources_ord = sources.iter().map(|source| source.outcome + 1).sum();
-        let sorter = Self::sorter_against(outcome, price, sources_ord);
+        let sorter = Self::sorter_against(outcome, price, sources);
         Self::set_liquidity(
             &mut self.liquidities_against,
             sorter,
             outcome,
             price,
             liquidity,
-            sources,
+            sources.to_vec(),
         )
     }
 
@@ -247,7 +269,7 @@ impl MarketLiquidities {
         liquidity: u64,
     ) -> Result<()> {
         let liquidities = &mut self.liquidities_for;
-        let sorter = Self::sorter_for(outcome, price, Self::sources_ord(sources));
+        let sorter = Self::sorter_for(outcome, price, sources);
         Self::remove_liquidity(liquidities, sorter, liquidity)
     }
 
@@ -259,7 +281,7 @@ impl MarketLiquidities {
         liquidity: u64,
     ) -> Result<()> {
         let liquidities = &mut self.liquidities_against;
-        let sorter = Self::sorter_against(outcome, price, Self::sources_ord(sources));
+        let sorter = Self::sorter_against(outcome, price, sources);
         Self::remove_liquidity(liquidities, sorter, liquidity)
     }
 
@@ -287,8 +309,8 @@ impl MarketLiquidities {
     fn sorter_for(
         outcome: u16,
         price: f64,
-        sources_ord: u16,
-    ) -> impl FnMut(&MarketOutcomePriceLiquidity) -> Ordering {
+        sources: &[LiquidityKey],
+    ) -> impl FnMut(&MarketOutcomePriceLiquidity) -> Ordering + '_ {
         move |liquidity| {
             #[allow(clippy::comparison_chain)]
             if outcome < liquidity.outcome {
@@ -303,15 +325,15 @@ impl MarketLiquidities {
                 return Ordering::Less;
             }
 
-            Self::sources_ord(&liquidity.sources).cmp(&sources_ord)
+            Self::sources_ord(&liquidity.sources).cmp(&Self::sources_ord(sources))
         }
     }
 
     fn sorter_against(
         outcome: u16,
         price: f64,
-        sources_ord: u16,
-    ) -> impl FnMut(&MarketOutcomePriceLiquidity) -> Ordering {
+        sources: &[LiquidityKey],
+    ) -> impl FnMut(&MarketOutcomePriceLiquidity) -> Ordering + '_ {
         move |liquidity| {
             #[allow(clippy::comparison_chain)]
             if outcome < liquidity.outcome {
@@ -326,7 +348,7 @@ impl MarketLiquidities {
                 return Ordering::Greater;
             }
 
-            Self::sources_ord(&liquidity.sources).cmp(&sources_ord)
+            Self::sources_ord(&liquidity.sources).cmp(&Self::sources_ord(sources))
         }
     }
 
@@ -414,7 +436,7 @@ mod tests {
     fn test_add_liquidity() {
         let mut mls = mock_market_liquidities(Pubkey::default());
 
-        mls.set_liquidity_for(0, 2.1, 10, vec![LiquidityKey::new(1, 9.9)]);
+        mls.set_liquidity_for(0, 2.1, 10, &[LiquidityKey::new(1, 9.9)]);
         mls.add_liquidity_for(0, 2.1, 5).unwrap();
         mls.add_liquidity_for(0, 2.1, 5).unwrap();
         mls.add_liquidity_for(0, 2.2, 15).unwrap();
@@ -422,7 +444,7 @@ mod tests {
         mls.add_liquidity_for(2, 2.1, 15).unwrap();
         mls.add_liquidity_for(2, 2.1, 10).unwrap();
 
-        mls.set_liquidity_against(0, 2.1, 10, vec![LiquidityKey::new(1, 9.9)]);
+        mls.set_liquidity_against(0, 2.1, 10, &[LiquidityKey::new(1, 9.9)]);
         mls.add_liquidity_against(0, 2.1, 5).unwrap();
         mls.add_liquidity_against(0, 2.1, 5).unwrap();
         mls.add_liquidity_against(0, 2.2, 15).unwrap();
