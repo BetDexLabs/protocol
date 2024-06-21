@@ -319,7 +319,7 @@ mod test_match_for_order {
             liquidities(&market_liquidities.liquidities_for)
         );
         assert_eq!(
-            vec![(3.5, 3, 20)],
+            vec![(3.5, "2.80,2.80".to_string(), 20)],
             liquidities2(&market_liquidities.liquidities_against)
         );
         assert_eq!(
@@ -1261,17 +1261,21 @@ fn liquidities(liquidities: &Vec<MarketOutcomePriceLiquidity>) -> Vec<(f64, u64)
 }
 
 #[cfg(test)]
-fn liquidities2(liquidities: &Vec<MarketOutcomePriceLiquidity>) -> Vec<(f64, u16, u64)> {
+fn liquidities2(liquidities: &Vec<MarketOutcomePriceLiquidity>) -> Vec<(f64, String, u64)> {
     liquidities
         .iter()
         .map(|v| {
             (
                 v.price,
-                MarketLiquidities::sources_ord(&v.sources),
+                v.sources
+                    .iter()
+                    .map(|source| format!("{:.2}", source.price))
+                    .collect::<Vec<String>>()
+                    .join(","),
                 v.liquidity,
             )
         })
-        .collect::<Vec<(f64, u16, u64)>>()
+        .collect::<Vec<(f64, String, u64)>>()
 }
 
 #[cfg(test)]
