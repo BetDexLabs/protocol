@@ -247,11 +247,12 @@ impl MarketLiquidities {
             })
             .collect::<Vec<(usize, u64)>>();
 
-        for (index, liquidity_amount) in indexed_liquidity_amounts {
-            if liquidity_amount == 0 {
-                self.liquidities_for.remove(index);
+        // bigger indexes need to be removed first
+        for (index, liquidity_amount) in indexed_liquidity_amounts.iter().rev() {
+            if *liquidity_amount == 0 {
+                self.liquidities_for.remove(*index);
             } else {
-                self.liquidities_for[index].liquidity = liquidity_amount;
+                self.liquidities_for[*index].liquidity = *liquidity_amount;
             }
         }
     }
@@ -270,11 +271,12 @@ impl MarketLiquidities {
             })
             .collect::<Vec<(usize, u64)>>();
 
-        for (index, liquidity_amount) in indexed_liquidity_amounts {
-            if liquidity_amount == 0 {
-                self.liquidities_against.remove(index);
+        // bigger indexes need to be removed first
+        for (index, liquidity_amount) in indexed_liquidity_amounts.iter().rev() {
+            if *liquidity_amount == 0 {
+                self.liquidities_against.remove(*index);
             } else {
-                self.liquidities_against[index].liquidity = liquidity_amount;
+                self.liquidities_against[*index].liquidity = *liquidity_amount;
             }
         }
     }
@@ -697,6 +699,101 @@ mod tests {
                 .liquidity
         );
         assert_eq!(None, market_liquidities.get_liquidity_against(0, 2.315));
+    }
+}
+
+#[cfg(test)]
+mod update_all_cross_liquidity {
+    use super::*;
+
+    #[test]
+    fn test_for() {
+        let market_pk = Pubkey::new_unique();
+        let mut mls = mock_market_liquidities(market_pk);
+        mls.add_liquidity_for(0, 3.0, 100).unwrap();
+        for price in [3.5, 4.0, 4.5] {
+            mls.add_liquidity_for(1, price, 100).unwrap();
+            mls.update_cross_liquidity_against(&[
+                LiquiditySource::new(0, 3.0),
+                LiquiditySource::new(1, price),
+            ]);
+        }
+
+        assert_eq!(
+            vec![
+                mock_liquidity(0, 3.0, 100),
+                mock_liquidity(1, 3.5, 100),
+                mock_liquidity(1, 4.0, 100),
+                mock_liquidity(1, 4.5, 100),
+            ],
+            mls.liquidities_for
+        );
+
+        let sources1 = [LiquiditySource::new(0, 3.0), LiquiditySource::new(1, 3.5)];
+        let sources2 = [LiquiditySource::new(0, 3.0), LiquiditySource::new(1, 4.0)];
+        let sources3 = [LiquiditySource::new(0, 3.0), LiquiditySource::new(1, 4.5)];
+
+        assert_eq!(
+            vec![
+                mock_liquidity_with_sources(2, 2.625, &sources1, 114),
+                mock_liquidity_with_sources(2, 2.4, &sources2, 125),
+                mock_liquidity_with_sources(2, 2.25, &sources3, 133),
+            ],
+            mls.liquidities_against
+        );
+
+        mls.remove_liquidity_for(0, 3.0, 100).unwrap();
+        mls.update_all_cross_liquidity_against(&LiquiditySource::new(0, 3.0));
+
+        assert_eq!(
+            Vec::<MarketOutcomePriceLiquidity>::new(),
+            mls.liquidities_against
+        );
+    }
+
+    #[test]
+    fn test_against() {
+        let market_pk = Pubkey::new_unique();
+        let mut mls = mock_market_liquidities(market_pk);
+        mls.add_liquidity_against(0, 3.0, 100).unwrap();
+        for price in [3.5, 4.0, 4.5] {
+            mls.add_liquidity_against(1, price, 100).unwrap();
+            mls.update_cross_liquidity_for(&[
+                LiquiditySource::new(0, 3.0),
+                LiquiditySource::new(1, price),
+            ]);
+        }
+
+        assert_eq!(
+            vec![
+                mock_liquidity(1, 4.5, 100),
+                mock_liquidity(1, 4.0, 100),
+                mock_liquidity(1, 3.5, 100),
+                mock_liquidity(0, 3.0, 100),
+            ],
+            mls.liquidities_against
+        );
+
+        let sources1 = [LiquiditySource::new(0, 3.0), LiquiditySource::new(1, 3.5)];
+        let sources2 = [LiquiditySource::new(0, 3.0), LiquiditySource::new(1, 4.0)];
+        let sources3 = [LiquiditySource::new(0, 3.0), LiquiditySource::new(1, 4.5)];
+
+        assert_eq!(
+            vec![
+                mock_liquidity_with_sources(2, 2.25, &sources3, 133),
+                mock_liquidity_with_sources(2, 2.4, &sources2, 125),
+                mock_liquidity_with_sources(2, 2.625, &sources1, 114),
+            ],
+            mls.liquidities_for
+        );
+
+        mls.remove_liquidity_against(0, 3.0, 100).unwrap();
+        mls.update_all_cross_liquidity_for(&LiquiditySource::new(0, 3.0));
+
+        assert_eq!(
+            Vec::<MarketOutcomePriceLiquidity>::new(),
+            mls.liquidities_for
+        );
     }
 }
 
