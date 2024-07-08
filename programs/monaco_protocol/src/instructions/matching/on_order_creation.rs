@@ -184,58 +184,58 @@ fn match_against_order(
         };
         let stake_matched = liquidity_value.min(order.stake_unmatched);
 
-        if stake_matched > 0_u64 {
-            if liquidity.sources.is_empty() {
-                // direct match
-                market_matching_queue
-                    .matches
-                    .enqueue(OrderMatch::maker(
-                        !order.for_outcome,
-                        order.market_outcome_index,
-                        liquidity.price,
-                        stake_matched,
-                    ))
-                    .ok_or(MatchingQueueIsFull)?;
-            } else {
-                // cross match
-                for liquidity_source in &liquidity.sources {
-                    let liquidity_source_stake_matched = calculate_stake_cross(
-                        stake_matched,
-                        liquidity.price,
-                        liquidity_source.price,
-                    );
+        // record it for removals later
+        order_matches.push((liquidity.price, liquidity.sources.clone(), stake_matched));
 
-                    market_matching_queue
-                        .matches
-                        .enqueue(OrderMatch::maker(
-                            order.for_outcome,
-                            liquidity_source.outcome,
-                            liquidity_source.price,
-                            liquidity_source_stake_matched,
-                        ))
-                        .ok_or(MatchingQueueIsFull)?;
-                }
-            }
+        if stake_matched == 0_u64 {
+            continue;
+        }
 
-            // record taker match
+        if liquidity.sources.is_empty() {
+            // direct match
             market_matching_queue
                 .matches
-                .enqueue(OrderMatch::taker(
-                    *order_pk,
-                    order.for_outcome,
+                .enqueue(OrderMatch::maker(
+                    !order.for_outcome,
                     order.market_outcome_index,
                     liquidity.price,
                     stake_matched,
                 ))
                 .ok_or(MatchingQueueIsFull)?;
+        } else {
+            // cross match
+            for liquidity_source in &liquidity.sources {
+                let liquidity_source_stake_matched =
+                    calculate_stake_cross(stake_matched, liquidity.price, liquidity_source.price);
 
-            // this needs to happen in the loop
-            order
-                .match_stake_unmatched(stake_matched, liquidity.price)
-                .map_err(|_| CoreError::MatchingPayoutAmountError)?;
+                market_matching_queue
+                    .matches
+                    .enqueue(OrderMatch::maker(
+                        order.for_outcome,
+                        liquidity_source.outcome,
+                        liquidity_source.price,
+                        liquidity_source_stake_matched,
+                    ))
+                    .ok_or(MatchingQueueIsFull)?;
+            }
         }
 
-        order_matches.push((liquidity.price, liquidity.sources.clone(), stake_matched));
+        // record taker match
+        market_matching_queue
+            .matches
+            .enqueue(OrderMatch::taker(
+                *order_pk,
+                order.for_outcome,
+                order.market_outcome_index,
+                liquidity.price,
+                stake_matched,
+            ))
+            .ok_or(MatchingQueueIsFull)?;
+
+        // this needs to happen in the loop
+        order
+            .match_stake_unmatched(stake_matched, liquidity.price)
+            .map_err(|_| CoreError::MatchingPayoutAmountError)?;
     }
 
     // remove matched liquidity
