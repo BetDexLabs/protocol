@@ -157,6 +157,9 @@ impl MarketLiquidities {
         amount / 1000 * 1000 // erase 3 last digits, so we don't have rounding on match
     }
 
+    // recalculates cross liquidity for a given sources
+    // this method does not validate parameters so value returned might not be real
+    // assumption is that all (n-1) different sources were passed for the n-outcome market and the price is of the n-th outcome
     pub fn update_cross_liquidity_for(&mut self, sources: &[LiquiditySource]) {
         // silly way of detecting which outcome is supposed to be updated
         // sum of all the outcomes minus sum of all provided ones equals the one we want
@@ -180,6 +183,9 @@ impl MarketLiquidities {
         }
     }
 
+    // recalculates cross liquidity for a given sources
+    // this method does not validate parameters so value returned might not be real
+    // assumption is that all (n-1) different sources were passed for the n-outcome market and the price is of the n-th outcome
     pub fn update_cross_liquidity_against(&mut self, sources: &[LiquiditySource]) {
         // silly way of detecting which outcome is supposed to be updated
         // sum of all the outcomes minus sum of all provided ones equals the one we want
@@ -235,6 +241,9 @@ impl MarketLiquidities {
         }
     }
 
+    // recalculates all existing cross liquidities for a given source
+    // removes elements with zero amount, but does NOT add new ones
+    // assumption is that all  existing cross liquidities are correct
     pub fn update_all_cross_liquidity_for(&mut self, liquidity_source: &LiquiditySource) {
         let indexed_liquidity_amounts = self
             .liquidities_for
@@ -259,6 +268,9 @@ impl MarketLiquidities {
         }
     }
 
+    // recalculates all existing cross liquidities for a given source
+    // removes elements with zero amount, but does NOT add new ones
+    // assumption is that all  existing cross liquidities are correct
     pub fn update_all_cross_liquidity_against(&mut self, liquidity_source: &LiquiditySource) {
         let indexed_liquidity_amounts = self
             .liquidities_against
