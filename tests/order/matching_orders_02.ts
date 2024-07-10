@@ -291,7 +291,17 @@ describe("Order Matching: Cross Liquidity", () => {
 
     // validate expected liquidity (cancellation does not remove cross liquidity)
     assert.deepEqual(await monaco.getMarketLiquidities(market.liquiditiesPk), {
-      liquiditiesAgainst: [],
+      liquiditiesAgainst: [
+        {
+          liquidity: 0.006,
+          outcome: 2,
+          price: 3.375,
+          sources: [
+            { outcome: 0, price: 2.7 },
+            { outcome: 1, price: 3 },
+          ],
+        },
+      ],
       liquiditiesFor: [{ liquidity: 0.009, outcome: 1, price: 3, sources: [] }],
     });
 
