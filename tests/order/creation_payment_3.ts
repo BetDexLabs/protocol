@@ -47,13 +47,18 @@ describe("Order Creation Payment 3", () => {
     assert.deepEqual(
       await Promise.all([
         market.getMarketPosition(purchaser),
-        market.getAgainstMatchingPool(outcomeA, price),
+        market.getMarketLiquidities(),
         market.getEscrowBalance(),
         market.getTokenBalance(purchaser),
       ]),
       [
         { matched: [0, 0, 0], unmatched: [10, 0, 0] },
-        { len: 1, liquidity: 10, matched: 0 },
+        {
+          liquiditiesAgainst: [
+            { liquidity: 10, outcome: 0, price: 2, sources: [] },
+          ],
+          liquiditiesFor: [],
+        },
         10,
         90,
       ],
@@ -65,13 +70,19 @@ describe("Order Creation Payment 3", () => {
     assert.deepEqual(
       await Promise.all([
         market.getMarketPosition(purchaser),
-        market.getAgainstMatchingPool(outcomeB, price),
+        market.getMarketLiquidities(),
         market.getEscrowBalance(),
         market.getTokenBalance(purchaser),
       ]),
       [
         { matched: [0, 0, 0], unmatched: [10, 10, 0] },
-        { len: 1, liquidity: 10, matched: 0 },
+        {
+          liquiditiesAgainst: [
+            { liquidity: 10, outcome: 1, price: 2, sources: [] },
+            { liquidity: 10, outcome: 0, price: 2, sources: [] },
+          ],
+          liquiditiesFor: [],
+        },
         10,
         90,
       ],
@@ -83,13 +94,20 @@ describe("Order Creation Payment 3", () => {
     assert.deepEqual(
       await Promise.all([
         market.getMarketPosition(purchaser),
-        market.getAgainstMatchingPool(outcomeC, price),
+        market.getMarketLiquidities(),
         market.getEscrowBalance(),
         market.getTokenBalance(purchaser),
       ]),
       [
         { matched: [0, 0, 0], unmatched: [10, 10, 10] },
-        { len: 1, liquidity: 10, matched: 0 },
+        {
+          liquiditiesAgainst: [
+            { liquidity: 10, outcome: 2, price: 2, sources: [] },
+            { liquidity: 10, outcome: 1, price: 2, sources: [] },
+            { liquidity: 10, outcome: 0, price: 2, sources: [] },
+          ],
+          liquiditiesFor: [],
+        },
         10,
         90,
       ],
@@ -116,13 +134,18 @@ describe("Order Creation Payment 3", () => {
     assert.deepEqual(
       await Promise.all([
         market.getMarketPosition(purchaser),
-        market.getAgainstMatchingPool(outcomeA, price),
+        market.getMarketLiquidities(),
         market.getEscrowBalance(),
         market.getTokenBalance(purchaser),
       ]),
       [
         { matched: [0, 0, 0], unmatched: [20, 0, 0] },
-        { len: 1, liquidity: 10, matched: 0 },
+        {
+          liquiditiesAgainst: [
+            { liquidity: 10, outcome: 0, price: 3, sources: [] },
+          ],
+          liquiditiesFor: [],
+        },
         20,
         80,
       ],
@@ -134,13 +157,19 @@ describe("Order Creation Payment 3", () => {
     assert.deepEqual(
       await Promise.all([
         market.getMarketPosition(purchaser),
-        market.getAgainstMatchingPool(outcomeB, price),
+        market.getMarketLiquidities(),
         market.getEscrowBalance(),
         market.getTokenBalance(purchaser),
       ]),
       [
         { matched: [0, 0, 0], unmatched: [20, 20, 0] },
-        { len: 1, liquidity: 10, matched: 0 },
+        {
+          liquiditiesAgainst: [
+            { liquidity: 10, outcome: 1, price: 3, sources: [] },
+            { liquidity: 10, outcome: 0, price: 3, sources: [] },
+          ],
+          liquiditiesFor: [],
+        },
         20,
         80,
       ],
@@ -152,13 +181,20 @@ describe("Order Creation Payment 3", () => {
     assert.deepEqual(
       await Promise.all([
         market.getMarketPosition(purchaser),
-        market.getAgainstMatchingPool(outcomeC, price),
+        market.getMarketLiquidities(),
         market.getEscrowBalance(),
         market.getTokenBalance(purchaser),
       ]),
       [
         { matched: [0, 0, 0], unmatched: [20, 20, 20] },
-        { len: 1, liquidity: 10, matched: 0 },
+        {
+          liquiditiesAgainst: [
+            { liquidity: 10, outcome: 2, price: 3, sources: [] },
+            { liquidity: 10, outcome: 1, price: 3, sources: [] },
+            { liquidity: 10, outcome: 0, price: 3, sources: [] },
+          ],
+          liquiditiesFor: [],
+        },
         20,
         80,
       ],
@@ -185,13 +221,18 @@ describe("Order Creation Payment 3", () => {
     assert.deepEqual(
       await Promise.all([
         market.getMarketPosition(purchaser),
-        market.getAgainstMatchingPool(outcomeA, price),
+        market.getMarketLiquidities(),
         market.getEscrowBalance(),
         market.getTokenBalance(purchaser),
       ]),
       [
         { matched: [0, 0, 0], unmatched: [30, 0, 0] },
-        { len: 1, liquidity: 10, matched: 0 },
+        {
+          liquiditiesAgainst: [
+            { liquidity: 10, outcome: 0, price: 4, sources: [] },
+          ],
+          liquiditiesFor: [],
+        },
         30,
         70,
       ],
@@ -203,13 +244,19 @@ describe("Order Creation Payment 3", () => {
     assert.deepEqual(
       await Promise.all([
         market.getMarketPosition(purchaser),
-        market.getAgainstMatchingPool(outcomeB, price),
+        market.getMarketLiquidities(),
         market.getEscrowBalance(),
         market.getTokenBalance(purchaser),
       ]),
       [
         { matched: [0, 0, 0], unmatched: [30, 30, 0] },
-        { len: 1, liquidity: 10, matched: 0 },
+        {
+          liquiditiesAgainst: [
+            { liquidity: 10, outcome: 1, price: 4, sources: [] },
+            { liquidity: 10, outcome: 0, price: 4, sources: [] },
+          ],
+          liquiditiesFor: [],
+        },
         30,
         70,
       ],
@@ -221,13 +268,20 @@ describe("Order Creation Payment 3", () => {
     assert.deepEqual(
       await Promise.all([
         market.getMarketPosition(purchaser),
-        market.getAgainstMatchingPool(outcomeC, price),
+        market.getMarketLiquidities(),
         market.getEscrowBalance(),
         market.getTokenBalance(purchaser),
       ]),
       [
         { matched: [0, 0, 0], unmatched: [30, 30, 30] },
-        { len: 1, liquidity: 10, matched: 0 },
+        {
+          liquiditiesAgainst: [
+            { liquidity: 10, outcome: 2, price: 4, sources: [] },
+            { liquidity: 10, outcome: 1, price: 4, sources: [] },
+            { liquidity: 10, outcome: 0, price: 4, sources: [] },
+          ],
+          liquiditiesFor: [],
+        },
         30,
         70,
       ],

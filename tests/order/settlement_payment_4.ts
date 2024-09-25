@@ -101,9 +101,6 @@ describe("Order Settlement Payment 4", () => {
       await Promise.all([
         market.getMarketPosition(purchaserA),
         market.getMarketPosition(purchaserB),
-        monaco.getMarketMatchingPool(market.matchingPools[0][3.0].forOutcome),
-        monaco.getMarketMatchingPool(market.matchingPools[0][3.0].against),
-        monaco.getMarketMatchingPool(market.matchingPools[1][3.0].against),
         market.getEscrowBalance(),
         market.getTokenBalance(purchaserA),
         market.getTokenBalance(purchaserB),
@@ -111,9 +108,6 @@ describe("Order Settlement Payment 4", () => {
       [
         { matched: [-20, 10, 10], unmatched: [0, 20, 0] },
         { matched: [20, -10, -10], unmatched: [0, 0, 0] },
-        { len: 0, liquidity: 0, matched: 10 },
-        { len: 0, liquidity: 0, matched: 10 },
-        { len: 1, liquidity: 10, matched: 0 },
         30,
         980,
         990,

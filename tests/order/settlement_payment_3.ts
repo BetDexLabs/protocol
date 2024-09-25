@@ -47,35 +47,19 @@ describe("Order Settlement Payment 3", () => {
     assert.deepEqual(
       await Promise.all([
         market.getMarketPosition(purchaser),
-        monaco.getMarketMatchingPool(
-          market.matchingPools[outcome][1.97].forOutcome,
-        ),
-        monaco.getMarketMatchingPool(
-          market.matchingPools[outcome][1.99].forOutcome,
-        ),
-        monaco.getMarketMatchingPool(
-          market.matchingPools[outcome][2.01].forOutcome,
-        ),
-        monaco.getMarketMatchingPool(
-          market.matchingPools[outcome][1.99].against,
-        ),
-        monaco.getMarketMatchingPool(
-          market.matchingPools[outcome][2.0].against,
-        ),
-        monaco.getMarketMatchingPool(
-          market.matchingPools[outcome][2.01].against,
-        ),
+        market.getMarketLiquidities(),
         market.getEscrowBalance(),
         market.getTokenBalance(purchaser),
       ]),
       [
         { matched: [0, 0, 0], unmatched: [0, 250, 250] },
-        { len: 0, liquidity: 0, matched: 400 },
-        { len: 1, liquidity: 150, matched: 200 },
-        { len: 1, liquidity: 100, matched: 0 },
-        { len: 0, liquidity: 0, matched: 200 },
-        { len: 0, liquidity: 0, matched: 200 },
-        { len: 0, liquidity: 0, matched: 200 },
+        {
+          liquiditiesAgainst: [],
+          liquiditiesFor: [
+            { liquidity: 150, outcome: 0, price: 1.99, sources: [] },
+            { liquidity: 100, outcome: 0, price: 2.01, sources: [] },
+          ],
+        },
         250,
         750,
       ],
@@ -131,35 +115,19 @@ describe("Order Settlement Payment 3", () => {
     assert.deepEqual(
       await Promise.all([
         market.getMarketPosition(purchaser),
-        monaco.getMarketMatchingPool(
-          market.matchingPools[outcome][1.97].forOutcome,
-        ),
-        monaco.getMarketMatchingPool(
-          market.matchingPools[outcome][1.99].forOutcome,
-        ),
-        monaco.getMarketMatchingPool(
-          market.matchingPools[outcome][2.01].forOutcome,
-        ),
-        monaco.getMarketMatchingPool(
-          market.matchingPools[outcome][1.99].against,
-        ),
-        monaco.getMarketMatchingPool(
-          market.matchingPools[outcome][2.0].against,
-        ),
-        monaco.getMarketMatchingPool(
-          market.matchingPools[outcome][2.01].against,
-        ),
+        market.getMarketLiquidities(),
         market.getEscrowBalance(),
         market.getTokenBalance(purchaser),
       ]),
       [
         { matched: [202, -200, -200], unmatched: [398, 450, 450] },
-        { len: 1, liquidity: 100, matched: 300 },
-        { len: 2, liquidity: 250, matched: 100 },
-        { len: 1, liquidity: 100, matched: 0 },
-        { len: 1, liquidity: 200, matched: 0 },
-        { len: 2, liquidity: 200, matched: 0 },
-        { len: 0, liquidity: 0, matched: 200 },
+        {
+          liquiditiesAgainst: [],
+          liquiditiesFor: [
+            { liquidity: 150, outcome: 0, price: 1.99, sources: [] },
+            { liquidity: 100, outcome: 0, price: 2.01, sources: [] },
+          ],
+        },
         650,
         350,
       ],
@@ -171,35 +139,19 @@ describe("Order Settlement Payment 3", () => {
     assert.deepEqual(
       await Promise.all([
         market.getMarketPosition(purchaser),
-        monaco.getMarketMatchingPool(
-          market.matchingPools[outcome][1.97].forOutcome,
-        ),
-        monaco.getMarketMatchingPool(
-          market.matchingPools[outcome][1.99].forOutcome,
-        ),
-        monaco.getMarketMatchingPool(
-          market.matchingPools[outcome][2.01].forOutcome,
-        ),
-        monaco.getMarketMatchingPool(
-          market.matchingPools[outcome][1.99].against,
-        ),
-        monaco.getMarketMatchingPool(
-          market.matchingPools[outcome][2.0].against,
-        ),
-        monaco.getMarketMatchingPool(
-          market.matchingPools[outcome][2.01].against,
-        ),
+        market.getMarketLiquidities(),
         market.getEscrowBalance(),
         market.getTokenBalance(purchaser),
       ]),
       [
         { matched: [0, 0, 0], unmatched: [0, 250, 250] },
-        { len: 0, liquidity: 0, matched: 400 },
-        { len: 1, liquidity: 150, matched: 200 },
-        { len: 1, liquidity: 100, matched: 0 },
-        { len: 0, liquidity: 0, matched: 200 },
-        { len: 0, liquidity: 0, matched: 200 },
-        { len: 0, liquidity: 0, matched: 200 },
+        {
+          liquiditiesAgainst: [],
+          liquiditiesFor: [
+            { liquidity: 150, outcome: 0, price: 1.99, sources: [] },
+            { liquidity: 100, outcome: 0, price: 2.01, sources: [] },
+          ],
+        },
         250,
         750,
       ],

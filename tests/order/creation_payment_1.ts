@@ -36,13 +36,18 @@ describe("Order Creation Payment 1", () => {
     assert.deepEqual(
       await Promise.all([
         market.getMarketPosition(purchaser),
-        market.getForMatchingPool(outcome, prices[0]),
+        market.getMarketLiquidities(),
         market.getEscrowBalance(),
         market.getTokenBalance(purchaser),
       ]),
       [
         { matched: [0, 0, 0], unmatched: [0, 10, 10] },
-        { len: 1, liquidity: 10, matched: 0 },
+        {
+          liquiditiesAgainst: [],
+          liquiditiesFor: [
+            { liquidity: 10, outcome: 0, price: 3, sources: [] },
+          ],
+        },
         10,
         90,
       ],
@@ -54,15 +59,13 @@ describe("Order Creation Payment 1", () => {
     assert.deepEqual(
       await Promise.all([
         market.getMarketPosition(purchaser),
-        market.getForMatchingPool(outcome, prices[0]),
-        market.getAgainstMatchingPool(outcome, prices[1]),
+        market.getMarketLiquidities(),
         market.getEscrowBalance(),
         market.getTokenBalance(purchaser),
       ]),
       [
         { matched: [-20, 10, 10], unmatched: [0, 10, 10] },
-        { len: 1, liquidity: 10, matched: 0 },
-        { len: 0, liquidity: 0, matched: 10 },
+        { liquiditiesAgainst: [], liquiditiesFor: [] },
         20,
         80,
       ],
@@ -74,15 +77,18 @@ describe("Order Creation Payment 1", () => {
     assert.deepEqual(
       await Promise.all([
         market.getMarketPosition(purchaser),
-        market.getForMatchingPool(outcome, prices[0]),
-        market.getAgainstMatchingPool(outcome, prices[1]),
+        market.getMarketLiquidities(),
         market.getEscrowBalance(),
         market.getTokenBalance(purchaser),
       ]),
       [
         { matched: [-20, 10, 10], unmatched: [39, 10, 10] },
-        { len: 1, liquidity: 10, matched: 0 },
-        { len: 1, liquidity: 10, matched: 10 },
+        {
+          liquiditiesAgainst: [
+            { liquidity: 10, outcome: 0, price: 4.9, sources: [] },
+          ],
+          liquiditiesFor: [],
+        },
         59,
         41,
       ],

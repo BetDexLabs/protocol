@@ -88,7 +88,6 @@ pub fn on_order_match_maker(
             )?;
             update_matching_pool_with_matched_order(
                 market_matching_pool,
-                matched_stake,
                 *order_pk,
                 order.stake_unmatched == 0_u64,
             )?;
@@ -180,8 +179,6 @@ mod test {
             market_outcome_index,
             for_outcome: false,
             price: matched_price,
-            liquidity_amount: 100_u64,
-            matched_amount: 0_u64,
             inplay: false,
             orders: Cirque::new(1),
             payer: payer_pk,
@@ -219,8 +216,6 @@ mod test {
         assert_eq!(vec!(0, 140, 0), market_position.unmatched_exposures);
         assert_eq!(vec!(0, 0, 0), market_position.market_outcome_sums);
 
-        assert_eq!(100_u64, market_matching_pool.liquidity_amount);
-        assert_eq!(0_u64, market_matching_pool.matched_amount);
         assert_eq!(1_u32, market_matching_pool.orders.len());
 
         assert_eq!(false, maker_order_trade.for_outcome); // default value
@@ -263,8 +258,6 @@ mod test {
             market_outcome_index,
             for_outcome: false,
             price: matched_price,
-            liquidity_amount: 100_u64,
-            matched_amount: 0_u64,
             inplay: false,
             orders: Cirque::new(1),
             payer: payer_pk,
@@ -304,8 +297,6 @@ mod test {
         assert_eq!(vec!(0, 126, 0), market_position.unmatched_exposures);
         assert_eq!(vec!(10, -12, 10), market_position.market_outcome_sums);
 
-        assert_eq!(90_u64, market_matching_pool.liquidity_amount);
-        assert_eq!(10_u64, market_matching_pool.matched_amount);
         assert_eq!(1_u32, market_matching_pool.orders.len());
 
         assert_eq!(false, maker_order_trade.for_outcome);
@@ -348,8 +339,6 @@ mod test {
             market_outcome_index,
             for_outcome: false,
             price: matched_price,
-            liquidity_amount: 10_u64,
-            matched_amount: 0_u64,
             inplay: false,
             orders: Cirque::new(1),
             payer: payer_pk,
@@ -389,8 +378,6 @@ mod test {
         assert_eq!(vec!(0, 0, 0), market_position.unmatched_exposures);
         assert_eq!(vec!(10, -12, 10), market_position.market_outcome_sums);
 
-        assert_eq!(0_u64, market_matching_pool.liquidity_amount);
-        assert_eq!(10_u64, market_matching_pool.matched_amount);
         assert_eq!(0_u32, market_matching_pool.orders.len());
 
         assert_eq!(false, maker_order_trade.for_outcome);

@@ -68,7 +68,6 @@ async function execute(outcomesCount: number) {
   await market.updateMarketLiquiditiesWithCrossLiquidity(
     true,
     sourceLiquidities,
-    { outcome: outcomesLastIndex, price },
   );
 
   // validate expected liquidity

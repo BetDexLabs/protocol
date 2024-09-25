@@ -11,8 +11,6 @@ pub struct MarketMatchingPool {
     pub for_outcome: bool,
     pub price: f64,
     pub payer: Pubkey,
-    pub liquidity_amount: u64,
-    pub matched_amount: u64,
     pub inplay: bool,
     pub orders: Cirque,
 }
@@ -26,8 +24,6 @@ impl MarketMatchingPool {
         BOOL_SIZE + // for_outcome
         F64_SIZE + // price
         PUB_KEY_SIZE + // payer
-        U64_SIZE + // liquidity_amount
-        U64_SIZE + // matched_amount
         BOOL_SIZE + // inplay
         Cirque::size_for(MarketMatchingPool::QUEUE_LENGTH); //orders
 
@@ -36,7 +32,6 @@ impl MarketMatchingPool {
 
         if market_event_start_order_behaviour.eq(&MarketOrderBehaviour::CancelUnmatched) {
             self.orders.set_length_to_zero();
-            self.liquidity_amount = 0_u64;
         }
     }
 }

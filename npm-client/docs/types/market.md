@@ -83,7 +83,7 @@ Type: {markets: [Array][37]\<GetAccount<[MarketAccount][3]>>}
 
 ## MarketMatchingPoolAccount
 
-Type: {market: PublicKey, inplay: [boolean][36], forOutcome: [boolean][36], marketOutcomeIndex: [number][34], price: [number][34], orders: {front: [number][34], len: [number][34], items: [Array][37]\<PublicKey>}, liquidityAmount: BN, matchedAmount: BN, payer: PublicKey}
+Type: {market: PublicKey, inplay: [boolean][36], forOutcome: [boolean][36], marketOutcomeIndex: [number][34], price: [number][34], orders: {front: [number][34], len: [number][34], items: [Array][37]\<PublicKey>}, payer: PublicKey}
 
 ### Properties
 
@@ -93,8 +93,6 @@ Type: {market: PublicKey, inplay: [boolean][36], forOutcome: [boolean][36], mark
 *   `marketOutcomeIndex` **[number][34]**&#x20;
 *   `price` **[number][34]**&#x20;
 *   `orders` **{front: [number][34], len: [number][34], items: [Array][37]\<PublicKey>}**&#x20;
-*   `liquidityAmount` **BN**&#x20;
-*   `matchedAmount` **BN**&#x20;
 *   `payer` **PublicKey**&#x20;
 
 ## MarketMatchingPoolAccounts

@@ -40,27 +40,18 @@ describe("Order Settlement Payment 2", () => {
     assert.deepEqual(
       await Promise.all([
         market.getMarketPosition(purchaser),
-        monaco.getMarketMatchingPool(
-          market.matchingPools[outcome][1.96].forOutcome,
-        ),
-        monaco.getMarketMatchingPool(
-          market.matchingPools[outcome][2.01].forOutcome,
-        ),
-        monaco.getMarketMatchingPool(
-          market.matchingPools[outcome][2.01].against,
-        ),
-        monaco.getMarketMatchingPool(
-          market.matchingPools[outcome][2.2].against,
-        ),
+        market.getMarketLiquidities(),
         market.getEscrowBalance(),
         market.getTokenBalance(purchaser),
       ]),
       [
         { matched: [0, 0, 0], unmatched: [1.2, 0, 0] },
-        { len: 0, liquidity: 0, matched: 10 },
-        { len: 0, liquidity: 0, matched: 21 },
-        { len: 0, liquidity: 0, matched: 11 },
-        { len: 1, liquidity: 1, matched: 20 },
+        {
+          liquiditiesAgainst: [
+            { liquidity: 1, outcome: 0, price: 2.2, sources: [] },
+          ],
+          liquiditiesFor: [],
+        },
         1.2,
         98.8,
       ],
@@ -110,27 +101,18 @@ describe("Order Settlement Payment 2", () => {
     assert.deepEqual(
       await Promise.all([
         market.getMarketPosition(purchaser),
-        monaco.getMarketMatchingPool(
-          market.matchingPools[outcome][1.96].forOutcome,
-        ),
-        monaco.getMarketMatchingPool(
-          market.matchingPools[outcome][2.01].forOutcome,
-        ),
-        monaco.getMarketMatchingPool(
-          market.matchingPools[outcome][2.01].against,
-        ),
-        monaco.getMarketMatchingPool(
-          market.matchingPools[outcome][2.2].against,
-        ),
+        market.getMarketLiquidities(),
         market.getEscrowBalance(),
         market.getTokenBalance(purchaser),
       ]),
       [
         { matched: [35.11, -31, -31], unmatched: [36.31, 0, 0] },
-        { len: 0, liquidity: 0, matched: 10 },
-        { len: 0, liquidity: 0, matched: 21 },
-        { len: 1, liquidity: 11, matched: 0 },
-        { len: 2, liquidity: 21, matched: 0 },
+        {
+          liquiditiesAgainst: [
+            { liquidity: 1, outcome: 0, price: 2.2, sources: [] },
+          ],
+          liquiditiesFor: [],
+        },
         36.31,
         63.69,
       ],
@@ -142,27 +124,18 @@ describe("Order Settlement Payment 2", () => {
     assert.deepEqual(
       await Promise.all([
         market.getMarketPosition(purchaser),
-        monaco.getMarketMatchingPool(
-          market.matchingPools[outcome][1.96].forOutcome,
-        ),
-        monaco.getMarketMatchingPool(
-          market.matchingPools[outcome][2.01].forOutcome,
-        ),
-        monaco.getMarketMatchingPool(
-          market.matchingPools[outcome][2.01].against,
-        ),
-        monaco.getMarketMatchingPool(
-          market.matchingPools[outcome][2.2].against,
-        ),
+        market.getMarketLiquidities(),
         market.getEscrowBalance(),
         market.getTokenBalance(purchaser),
       ]),
       [
         { matched: [0, 0, 0], unmatched: [1.2, 0, 0] },
-        { len: 0, liquidity: 0, matched: 10 },
-        { len: 0, liquidity: 0, matched: 21 },
-        { len: 0, liquidity: 0, matched: 11 },
-        { len: 1, liquidity: 1, matched: 20 },
+        {
+          liquiditiesAgainst: [
+            { liquidity: 1, outcome: 0, price: 2.2, sources: [] },
+          ],
+          liquiditiesFor: [],
+        },
         1.2,
         98.8,
       ],

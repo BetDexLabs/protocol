@@ -28,11 +28,11 @@ describe("Security: Cancel Order", () => {
 
     assert.deepEqual(
       await Promise.all([
-        market.getForMatchingPool(outcomeIndex, price),
+        market.getMarketLiquidities(),
         market.getEscrowBalance(),
         market.getTokenBalance(purchaser),
       ]),
-      [{ len: 0, liquidity: 0, matched: 0 }, 0, 10000],
+      [{ liquiditiesAgainst: [], liquiditiesFor: [] }, 0, 10000],
     );
 
     // check order was deleted
@@ -127,14 +127,19 @@ describe("Security: Cancel Order", () => {
       await Promise.all([
         monaco.getOrder(orderPk),
         market.getMarketPosition(purchaser),
-        market.getForMatchingPool(outcomeIndex, price),
+        market.getMarketLiquidities(),
         market.getEscrowBalance(),
         market.getTokenBalance(purchaser),
       ]),
       [
         { stakeUnmatched: 2000, stakeVoided: 0, status: { open: {} } },
         { matched: [0, 0, 0], unmatched: [2000, 0, 2000] },
-        { len: 1, liquidity: 2000, matched: 0 },
+        {
+          liquiditiesAgainst: [],
+          liquiditiesFor: [
+            { liquidity: 2000, outcome: 1, price: 6, sources: [] },
+          ],
+        },
         2000,
         8000,
       ],
@@ -195,14 +200,19 @@ describe("Security: Cancel Order", () => {
       await Promise.all([
         monaco.getOrder(orderPk),
         market.getMarketPosition(purchaser),
-        market.getForMatchingPool(outcomeIndex, price),
+        market.getMarketLiquidities(),
         market.getEscrowBalance(),
         market.getTokenBalance(purchaser),
       ]),
       [
         { stakeUnmatched: 2000, stakeVoided: 0, status: { open: {} } },
         { matched: [0, 0, 0], unmatched: [2000, 0, 2000] },
-        { len: 1, liquidity: 2000, matched: 0 },
+        {
+          liquiditiesAgainst: [],
+          liquiditiesFor: [
+            { liquidity: 2000, outcome: 1, price: 6, sources: [] },
+          ],
+        },
         2000,
         8000,
       ],
@@ -258,14 +268,19 @@ describe("Security: Cancel Order", () => {
       await Promise.all([
         monaco.getOrder(orderPk),
         market.getMarketPosition(purchaser),
-        market.getForMatchingPool(outcomeIndex, price),
+        market.getMarketLiquidities(),
         market.getEscrowBalance(),
         market.getTokenBalance(purchaser),
       ]),
       [
         { stakeUnmatched: 2000, stakeVoided: 0, status: { open: {} } },
         { matched: [0, 0, 0], unmatched: [2000, 0, 2000] },
-        { len: 1, liquidity: 2000, matched: 0 },
+        {
+          liquiditiesAgainst: [],
+          liquiditiesFor: [
+            { liquidity: 2000, outcome: 1, price: 6, sources: [] },
+          ],
+        },
         2000,
         8000,
       ],
@@ -326,14 +341,19 @@ describe("Security: Cancel Order", () => {
       await Promise.all([
         monaco.getOrder(orderPk),
         market.getMarketPosition(purchaser),
-        market.getForMatchingPool(outcomeIndex, price),
+        market.getMarketLiquidities(),
         market.getEscrowBalance(),
         market.getTokenBalance(purchaser),
       ]),
       [
         { stakeUnmatched: 2000, stakeVoided: 0, status: { open: {} } },
         { matched: [0, 0, 0], unmatched: [2000, 0, 2000] },
-        { len: 1, liquidity: 2000, matched: 0 },
+        {
+          liquiditiesAgainst: [],
+          liquiditiesFor: [
+            { liquidity: 2000, outcome: 1, price: 6, sources: [] },
+          ],
+        },
         2000,
         8000,
       ],
@@ -397,14 +417,19 @@ describe("Security: Cancel Order", () => {
       await Promise.all([
         monaco.getOrder(orderPk),
         market.getMarketPosition(purchaser),
-        market.getForMatchingPool(outcomeIndex, price),
+        market.getMarketLiquidities(),
         market.getEscrowBalance(),
         market.getTokenBalance(purchaser),
       ]),
       [
         { stakeUnmatched: 2000, stakeVoided: 0, status: { open: {} } },
         { matched: [0, 0, 0], unmatched: [2000, 0, 2000] },
-        { len: 1, liquidity: 2000, matched: 0 },
+        {
+          liquiditiesAgainst: [],
+          liquiditiesFor: [
+            { liquidity: 2000, outcome: 1, price: 6, sources: [] },
+          ],
+        },
         2000,
         8000,
       ],
@@ -433,14 +458,19 @@ describe("Security: Cancel Order", () => {
       await Promise.all([
         monaco.getOrder(orderPk),
         market.getMarketPosition(purchaser),
-        market.getForMatchingPool(outcomeIndex, price),
+        market.getMarketLiquidities(),
         market.getEscrowBalance(),
         market.getTokenBalance(purchaser),
       ]),
       [
         { stakeUnmatched: 2000, stakeVoided: 0, status: { open: {} } },
         { matched: [0, 0, 0], unmatched: [2000, 0, 2000] },
-        { len: 1, liquidity: 2000, matched: 0 },
+        {
+          liquiditiesAgainst: [],
+          liquiditiesFor: [
+            { liquidity: 2000, outcome: 1, price: 6, sources: [] },
+          ],
+        },
         2000,
         8000,
       ],
@@ -503,14 +533,19 @@ describe("Security: Cancel Order", () => {
       await Promise.all([
         monaco.getOrder(orderPk),
         market.getMarketPosition(purchaser),
-        market.getForMatchingPool(outcomeIndex, price),
+        market.getMarketLiquidities(),
         market.getEscrowBalance(),
         market.getTokenBalance(purchaser),
       ]),
       [
         { stakeUnmatched: 2000, stakeVoided: 0, status: { open: {} } },
         { matched: [0, 0, 0], unmatched: [2000, 0, 2000] },
-        { len: 1, liquidity: 2000, matched: 0 },
+        {
+          liquiditiesAgainst: [],
+          liquiditiesFor: [
+            { liquidity: 2000, outcome: 1, price: 6, sources: [] },
+          ],
+        },
         2000,
         8000,
       ],
@@ -573,14 +608,19 @@ describe("Security: Cancel Order", () => {
       await Promise.all([
         monaco.getOrder(orderPk),
         market.getMarketPosition(purchaser),
-        market.getForMatchingPool(outcomeIndex, price),
+        market.getMarketLiquidities(),
         market.getEscrowBalance(),
         market.getTokenBalance(purchaser),
       ]),
       [
         { stakeUnmatched: 2000, stakeVoided: 0, status: { open: {} } },
         { matched: [0, 0, 0], unmatched: [2000, 0, 2000] },
-        { len: 1, liquidity: 2000, matched: 0 },
+        {
+          liquiditiesAgainst: [],
+          liquiditiesFor: [
+            { liquidity: 2000, outcome: 1, price: 6, sources: [] },
+          ],
+        },
         2000,
         8000,
       ],
@@ -630,23 +670,6 @@ async function setupUnmatchedOrder(
   await market.airdrop(purchaser, 10_000);
 
   const orderPk = await market.forOrder(outcomeIndex, stake, price, purchaser);
-
-  assert.deepEqual(
-    await Promise.all([
-      protocol.getOrder(orderPk),
-      market.getMarketPosition(purchaser),
-      market.getForMatchingPool(outcomeIndex, price),
-      market.getEscrowBalance(),
-      market.getTokenBalance(purchaser),
-    ]),
-    [
-      { stakeUnmatched: 2000, stakeVoided: 0, status: { open: {} } },
-      { matched: [0, 0, 0], unmatched: [2000, 0, 2000] },
-      { len: 1, liquidity: 2000, matched: 0 },
-      2000,
-      8000,
-    ],
-  );
 
   return { market, purchaser, orderPk };
 }

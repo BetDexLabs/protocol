@@ -197,8 +197,6 @@ pub fn initialize_market_matching_pool(
     matching_pool.price = order.expected_price;
     matching_pool.for_outcome = order.for_outcome;
     matching_pool.payer = order.payer;
-    matching_pool.liquidity_amount = 0_u64;
-    matching_pool.matched_amount = 0_u64;
     matching_pool.orders = Cirque::new(MarketMatchingPool::QUEUE_LENGTH);
     matching_pool.inplay = market.is_inplay();
     Ok(())

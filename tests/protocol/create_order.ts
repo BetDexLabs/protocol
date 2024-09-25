@@ -98,11 +98,6 @@ describe("Protocol - Create Order", () => {
         : market.matchingPools[outcomeIndex][price].against,
     );
     assert.equal(
-      marketMatchingPool.liquidityAmount.toNumber(),
-      market.toAmountInteger(testData.stake),
-    );
-    assert.equal(marketMatchingPool.matchedAmount.toNumber(), 0);
-    assert.equal(
       marketMatchingPool.orders.items[0].toBase58(),
       orderPk.toBase58(),
     );
@@ -443,11 +438,6 @@ describe("Protocol - Create Order", () => {
     );
     assert.equal(matchingPool.orders.items[0].toBase58(), orderPk);
     assert.equal(
-      matchingPool.liquidityAmount.toNumber(),
-      stakeInteger.toNumber(),
-    );
-    assert.equal(matchingPool.matchedAmount.toNumber(), 0);
-    assert.equal(
       matchingPool.payer.toBase58(),
       provider.wallet.publicKey.toBase58(),
     );
@@ -656,9 +646,6 @@ describe("Protocol - Create Order", () => {
     await market.airdrop(purchaser, 100.0);
 
     await market.forOrder(0, 1, 2.0, purchaser);
-
-    const matchingPool = await market.getForMatchingPool(0, 2.0);
-    assert.equal(matchingPool.liquidity, 1);
   });
 
   it("Create first order after market goes inplay and liquidity is not zerod", async () => {
@@ -680,15 +667,9 @@ describe("Protocol - Create Order", () => {
     await market.airdrop(purchaser, 100.0);
     await market.forOrder(0, 10, 2.0, purchaser);
 
-    let matchingPool = await market.getForMatchingPool(0, 2.0);
-    assert.equal(matchingPool.liquidity, 10);
-
     await market.updateMarketEventStartTimeToNow();
     await market.moveMarketToInplay();
 
     await market.forOrder(0, 1, 2.0, purchaser);
-
-    matchingPool = await market.getForMatchingPool(0, 2.0);
-    assert.equal(matchingPool.liquidity, 11);
   });
 });

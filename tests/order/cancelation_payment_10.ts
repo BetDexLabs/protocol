@@ -54,15 +54,16 @@ describe("Order Cancelation Payment 10", () => {
     assert.deepEqual(
       await Promise.all([
         market.getMarketPosition(purchaser),
-        market.getForMatchingPool(outcome, price),
-        market.getAgainstMatchingPool(outcome, price),
+        market.getMarketLiquidities(),
         market.getEscrowBalance(),
         market.getTokenBalance(purchaser),
       ]),
       [
         { matched: [5, -15, 5], unmatched: [10, 0, 10] },
-        { len: 1, liquidity: 10, matched: 0 },
-        { len: 0, liquidity: 0, matched: 5 },
+        {
+          liquiditiesAgainst: [],
+          liquiditiesFor: [{ liquidity: 5, outcome: 1, price: 4, sources: [] }],
+        },
         15,
         85,
       ],
@@ -79,15 +80,16 @@ describe("Order Cancelation Payment 10", () => {
     assert.deepEqual(
       await Promise.all([
         market.getMarketPosition(purchaser),
-        market.getForMatchingPool(outcome, price),
-        market.getAgainstMatchingPool(outcome, price),
+        market.getMarketLiquidities(),
         market.getEscrowBalance(),
         market.getTokenBalance(purchaser),
       ]),
       [
         { matched: [5, -15, 5], unmatched: [10, 0, 10] },
-        { len: 1, liquidity: 10, matched: 0 },
-        { len: 0, liquidity: 0, matched: 5 },
+        {
+          liquiditiesAgainst: [],
+          liquiditiesFor: [{ liquidity: 5, outcome: 1, price: 4, sources: [] }],
+        },
         15,
         85,
       ],
@@ -104,15 +106,16 @@ describe("Order Cancelation Payment 10", () => {
     assert.deepEqual(
       await Promise.all([
         market.getMarketPosition(purchaser),
-        market.getForMatchingPool(outcome, price),
-        market.getAgainstMatchingPool(outcome, price),
+        market.getMarketLiquidities(),
         market.getEscrowBalance(),
         market.getTokenBalance(purchaser),
       ]),
       [
         { matched: [5, -15, 5], unmatched: [10, 0, 10] },
-        { len: 1, liquidity: 10, matched: 0 },
-        { len: 0, liquidity: 0, matched: 5 },
+        {
+          liquiditiesAgainst: [],
+          liquiditiesFor: [{ liquidity: 5, outcome: 1, price: 4, sources: [] }],
+        },
         15,
         85,
       ],
@@ -144,15 +147,16 @@ describe("Order Cancelation Payment 10", () => {
     assert.deepEqual(
       await Promise.all([
         market.getMarketPosition(purchaser),
-        market.getForMatchingPool(outcome, price),
-        market.getAgainstMatchingPool(outcome, price),
+        market.getMarketLiquidities(),
         market.getEscrowBalance(),
         market.getTokenBalance(purchaser),
       ]),
       [
         { matched: [5, -15, 5], unmatched: [10, 0, 10] },
-        { len: 1, liquidity: 10, matched: 0 },
-        { len: 0, liquidity: 0, matched: 5 },
+        {
+          liquiditiesAgainst: [],
+          liquiditiesFor: [{ liquidity: 5, outcome: 1, price: 4, sources: [] }],
+        },
         15,
         85,
       ],
@@ -169,15 +173,16 @@ describe("Order Cancelation Payment 10", () => {
     assert.deepEqual(
       await Promise.all([
         market.getMarketPosition(purchaser),
-        market.getForMatchingPool(outcome, price),
-        market.getAgainstMatchingPool(outcome, price),
+        market.getMarketLiquidities(),
         market.getEscrowBalance(),
         market.getTokenBalance(purchaser),
       ]),
       [
         { matched: [5, -15, 5], unmatched: [10, 0, 10] },
-        { len: 1, liquidity: 10, matched: 0 },
-        { len: 0, liquidity: 0, matched: 5 },
+        {
+          liquiditiesAgainst: [],
+          liquiditiesFor: [{ liquidity: 5, outcome: 1, price: 4, sources: [] }],
+        },
         15,
         85,
       ],
@@ -194,15 +199,16 @@ describe("Order Cancelation Payment 10", () => {
     assert.deepEqual(
       await Promise.all([
         market.getMarketPosition(purchaser),
-        market.getForMatchingPool(outcome, price),
-        market.getAgainstMatchingPool(outcome, price),
+        market.getMarketLiquidities(),
         market.getEscrowBalance(),
         market.getTokenBalance(purchaser),
       ]),
       [
         { matched: [5, -15, 5], unmatched: [10, 0, 10] },
-        { len: 1, liquidity: 10, matched: 0 },
-        { len: 0, liquidity: 0, matched: 5 },
+        {
+          liquiditiesAgainst: [],
+          liquiditiesFor: [{ liquidity: 5, outcome: 1, price: 4, sources: [] }],
+        },
         15,
         85,
       ],
@@ -234,15 +240,16 @@ describe("Order Cancelation Payment 10", () => {
     assert.deepEqual(
       await Promise.all([
         market.getMarketPosition(purchaser),
-        market.getForMatchingPool(outcome, price),
-        market.getAgainstMatchingPool(outcome, price),
+        market.getMarketLiquidities(),
         market.getEscrowBalance(),
         market.getTokenBalance(purchaser),
       ]),
       [
         { matched: [-5, 15, -5], unmatched: [5, 15, 5] },
-        { len: 1, liquidity: 5, matched: 5 },
-        { len: 1, liquidity: 5, matched: 0 },
+        {
+          liquiditiesAgainst: [],
+          liquiditiesFor: [{ liquidity: 5, outcome: 1, price: 4, sources: [] }],
+        },
         15,
         85,
       ],
@@ -259,15 +266,16 @@ describe("Order Cancelation Payment 10", () => {
     assert.deepEqual(
       await Promise.all([
         market.getMarketPosition(purchaser),
-        market.getForMatchingPool(outcome, price),
-        market.getAgainstMatchingPool(outcome, price),
+        market.getMarketLiquidities(),
         market.getEscrowBalance(),
         market.getTokenBalance(purchaser),
       ]),
       [
         { matched: [-5, 15, -5], unmatched: [5, 15, 5] },
-        { len: 1, liquidity: 5, matched: 5 },
-        { len: 1, liquidity: 5, matched: 0 },
+        {
+          liquiditiesAgainst: [],
+          liquiditiesFor: [{ liquidity: 5, outcome: 1, price: 4, sources: [] }],
+        },
         15,
         85,
       ],
@@ -279,15 +287,13 @@ describe("Order Cancelation Payment 10", () => {
     assert.deepEqual(
       await Promise.all([
         market.getMarketPosition(purchaser),
-        market.getForMatchingPool(outcome, price),
-        market.getAgainstMatchingPool(outcome, price),
+        market.getMarketLiquidities(),
         market.getEscrowBalance(),
         market.getTokenBalance(purchaser),
       ]),
       [
         { matched: [-5, 15, -5], unmatched: [0, 15, 0] },
-        { len: 0, liquidity: 0, matched: 5 },
-        { len: 1, liquidity: 5, matched: 0 },
+        { liquiditiesAgainst: [], liquiditiesFor: [] },
         15,
         85,
       ],
@@ -319,15 +325,16 @@ describe("Order Cancelation Payment 10", () => {
     assert.deepEqual(
       await Promise.all([
         market.getMarketPosition(purchaser),
-        market.getForMatchingPool(outcome, price),
-        market.getAgainstMatchingPool(outcome, price),
+        market.getMarketLiquidities(),
         market.getEscrowBalance(),
         market.getTokenBalance(purchaser),
       ]),
       [
         { matched: [-5, 15, -5], unmatched: [5, 15, 5] },
-        { len: 1, liquidity: 5, matched: 5 },
-        { len: 1, liquidity: 5, matched: 0 },
+        {
+          liquiditiesAgainst: [],
+          liquiditiesFor: [{ liquidity: 5, outcome: 1, price: 4, sources: [] }],
+        },
         15,
         85,
       ],
@@ -339,15 +346,13 @@ describe("Order Cancelation Payment 10", () => {
     assert.deepEqual(
       await Promise.all([
         market.getMarketPosition(purchaser),
-        market.getForMatchingPool(outcome, price),
-        market.getAgainstMatchingPool(outcome, price),
+        market.getMarketLiquidities(),
         market.getEscrowBalance(),
         market.getTokenBalance(purchaser),
       ]),
       [
         { matched: [-5, 15, -5], unmatched: [0, 15, 0] },
-        { len: 0, liquidity: 0, matched: 5 },
-        { len: 1, liquidity: 5, matched: 0 },
+        { liquiditiesAgainst: [], liquiditiesFor: [] },
         15,
         85,
       ],
@@ -364,15 +369,13 @@ describe("Order Cancelation Payment 10", () => {
     assert.deepEqual(
       await Promise.all([
         market.getMarketPosition(purchaser),
-        market.getForMatchingPool(outcome, price),
-        market.getAgainstMatchingPool(outcome, price),
+        market.getMarketLiquidities(),
         market.getEscrowBalance(),
         market.getTokenBalance(purchaser),
       ]),
       [
         { matched: [-5, 15, -5], unmatched: [0, 15, 0] },
-        { len: 0, liquidity: 0, matched: 5 },
-        { len: 1, liquidity: 5, matched: 0 },
+        { liquiditiesAgainst: [], liquiditiesFor: [] },
         15,
         85,
       ],

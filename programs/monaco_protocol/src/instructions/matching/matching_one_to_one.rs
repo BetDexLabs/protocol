@@ -127,7 +127,6 @@ pub fn match_orders(ctx: &mut Context<MatchOrders>) -> Result<()> {
     matching::update_on_match(
         &mut ctx.accounts.market_matching_pool_against,
         &mut ctx.accounts.market_matching_pool_for,
-        stake_matched,
         order_for,
         order_against,
     )?;

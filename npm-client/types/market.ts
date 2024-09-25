@@ -63,8 +63,6 @@ export type MarketMatchingPoolAccount = {
     len: number;
     items: PublicKey[];
   };
-  liquidityAmount: BN;
-  matchedAmount: BN;
   payer: PublicKey;
 };
 

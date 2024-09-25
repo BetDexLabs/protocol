@@ -8,7 +8,7 @@ import {
   MarketPositions,
   Orders,
   Trades,
-} from "../../npm-client/src/";
+} from "../../npm-client";
 import console from "console";
 
 describe("End to end test of", () => {
@@ -53,7 +53,6 @@ describe("End to end test of", () => {
     await market.updateMarketEventStartTimeToNow();
 
     // Create an inplay order request before the market inplay flag has been updated
-    let matchingPool;
     let orderRequestQueue;
     try {
       orderRequestQueue = await market.getOrderRequestQueue();
@@ -66,40 +65,42 @@ describe("End to end test of", () => {
       throw e;
     }
 
+    assert.deepEqual(await market.getMarketLiquidities(), {
+      liquiditiesAgainst: [],
+      liquiditiesFor: [
+        { liquidity: 1, outcome: 0, price: 2, sources: [] },
+        { liquidity: 1, outcome: 1, price: 2, sources: [] },
+      ],
+    });
+
     await market.moveMarketToInplay();
+
+    assert.deepEqual(await market.getMarketLiquidities(), {
+      liquiditiesAgainst: [],
+      liquiditiesFor: [],
+    });
 
     // Changes below will be validated after all requests are processed
     //
     // 1. Inplay order into existing non-zero'd preplay matching pool
     // With existing liquidity
-    matchingPool = await market.getForMatchingPool(0, 2.0);
-    assert.equal(matchingPool.liquidity, 1);
-
+    assert.equal((await market.getForMatchingPool(0, 2.0)).len, 1);
     await market.forOrderRequest(0, 2, 2.0, purchaser);
-    matchingPool = await market.getForMatchingPool(0, 2.0);
-    assert.equal(matchingPool.liquidity, 1);
+    assert.equal((await market.getForMatchingPool(0, 2.0)).len, 1);
 
     // Without existing liquidity
-    matchingPool = await market.getAgainstMatchingPool(0, 2.0);
-    assert.equal(matchingPool.liquidity, 0);
-
+    assert.equal((await market.getAgainstMatchingPool(0, 2.0)).len, 0);
     await market.againstOrderRequest(0, 3, 2.0, purchaser);
-    matchingPool = await market.getAgainstMatchingPool(0, 2.0);
-    assert.equal(matchingPool.liquidity, 0);
+    assert.equal((await market.getAgainstMatchingPool(0, 2.0)).len, 0);
 
     // 2. Inplay order into existing zero'd preplay matching pool
     // With existing liquidity
-    matchingPool = await market.getForMatchingPool(1, 2.0);
-    assert.equal(matchingPool.liquidity, 1);
-
+    assert.equal((await market.getForMatchingPool(1, 2.0)).len, 1);
     await market.moveMarketMatchingPoolToInplay(1, 2.0, true);
-
-    matchingPool = await market.getForMatchingPool(1, 2.0);
-    assert.equal(matchingPool.liquidity, 0);
+    assert.equal((await market.getForMatchingPool(1, 2.0)).len, 0);
 
     await market.forOrderRequest(1, 1, 2.0, purchaser);
-    matchingPool = await market.getForMatchingPool(1, 2.0);
-    assert.equal(matchingPool.liquidity, 0);
+    assert.equal((await market.getForMatchingPool(1, 2.0)).len, 0);
 
     // 3. Inplay order creates new inplay matching pool
     try {
@@ -123,34 +124,21 @@ describe("End to end test of", () => {
     await new Promise((resolve) => setTimeout(resolve, inplayDelay * 1000));
 
     await market.processOrderRequests();
-
-    // Check liquidity that should be visible is visible
-    matchingPool = await market.getForMatchingPool(0, 2.0);
-    assert.equal(matchingPool.liquidity, 2);
-    matchingPool = await market.getAgainstMatchingPool(0, 2.0);
-    assert.equal(matchingPool.liquidity, 1);
-
-    matchingPool = await market.getForMatchingPool(1, 2.0);
-    assert.equal(matchingPool.liquidity, 1);
-
-    matchingPool = await market.getForMatchingPool(1, 3.0);
-    assert.equal(matchingPool.liquidity, 4.2);
-
-    matchingPool = await market.getForMatchingPool(2, 2.0);
-    assert.equal(matchingPool.liquidity, 1);
-    matchingPool = await market.getAgainstMatchingPool(2, 2.0);
-    assert.equal(matchingPool.liquidity, 0);
-
-    // Match order with liquidity that is not yet visible (but should be)
     await market.processMatchingQueue();
 
-    matchingPool = await market.getForMatchingPool(2, 2.0);
+    // Check liquidity that should be visible is visible
+    assert.deepEqual(await market.getMarketLiquidities(), {
+      liquiditiesAgainst: [{ liquidity: 1, outcome: 0, price: 2, sources: [] }],
+      liquiditiesFor: [
+        { liquidity: 1, outcome: 1, price: 2, sources: [] },
+        { liquidity: 4.2, outcome: 1, price: 3, sources: [] },
+        { liquidity: 1, outcome: 2, price: 3, sources: [] },
+      ],
+    });
+
     let order = await monaco.getOrder(inPlayOrder21.data.orderPk);
-    assert.deepEqual(matchingPool.liquidity, 0);
     assert.equal(order.stakeUnmatched, 0);
-    matchingPool = await market.getAgainstMatchingPool(2, 2.0);
     order = await monaco.getOrder(inPlayOrder22.data.orderPk);
-    assert.deepEqual(matchingPool.liquidity, 0);
     assert.equal(order.stakeUnmatched, 0);
 
     // Close orders due to event start

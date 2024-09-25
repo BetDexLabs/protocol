@@ -286,19 +286,12 @@ export class Monaco {
     return marketMatchingPool.orders.items[ordersFront];
   }
 
-  async getMarketMatchingPool(
-    marketMatchingPoolPk: PublicKey,
-    decimals = TOKEN_DECIMALS,
-  ) {
-    const decimalsMultiplier = 10 ** decimals;
+  async getMarketMatchingPool(marketMatchingPoolPk: PublicKey) {
     const marketMatchingPool = await this.fetchMarketMatchingPool(
       marketMatchingPoolPk,
     );
     return {
       len: marketMatchingPool.orders.len,
-      liquidity:
-        marketMatchingPool.liquidityAmount.toNumber() / decimalsMultiplier,
-      matched: marketMatchingPool.matchedAmount.toNumber() / decimalsMultiplier,
     };
   }
 
@@ -827,18 +820,12 @@ export class MonacoMarket {
 
   async getForMatchingPool(outcome: number, price: number) {
     const matchingPool = this.matchingPools[outcome][price];
-    return await this.monaco.getMarketMatchingPool(
-      matchingPool.forOutcome,
-      this.mintInfo.decimals,
-    );
+    return await this.monaco.getMarketMatchingPool(matchingPool.forOutcome);
   }
 
   async getAgainstMatchingPool(outcome: number, price: number) {
     const matchingPool = this.matchingPools[outcome][price];
-    return await this.monaco.getMarketMatchingPool(
-      matchingPool.against,
-      this.mintInfo.decimals,
-    );
+    return await this.monaco.getMarketMatchingPool(matchingPool.against);
   }
 
   async getMarketLiquidities() {

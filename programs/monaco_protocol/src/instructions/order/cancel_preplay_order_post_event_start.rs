@@ -524,8 +524,6 @@ mod test {
             market_outcome_index,
             for_outcome: false,
             price,
-            liquidity_amount: 0_u64,
-            matched_amount: 0_u64,
             inplay: false,
             orders: Cirque::new(1),
             payer: Pubkey::new_unique(),

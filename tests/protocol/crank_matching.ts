@@ -8,7 +8,7 @@ import {
   OperatorType,
 } from "../util/test_util";
 import { Monaco, monaco } from "../util/wrappers";
-import { findTradePda, uiStakeToInteger } from "../../npm-client/src";
+import { findTradePda, uiStakeToInteger } from "../../npm-client";
 
 describe("Matching Crank", () => {
   it("Unauthorised crank should error", async () => {
@@ -109,18 +109,13 @@ describe("Matching Crank", () => {
       await Promise.all([
         monaco.getOrder(forOrderPk),
         monaco.getOrder(againstOrderPk),
-
         market.getMarketPosition(purchaser),
-        market.getForMatchingPool(outcome, price),
-        market.getAgainstMatchingPool(outcome, price),
         market.getEscrowBalance(),
       ]),
       [
         { stakeUnmatched: 0, stakeVoided: 0, status: { matched: {} } },
         { stakeUnmatched: 0, stakeVoided: 0, status: { matched: {} } },
         { matched: [0, 0, 0], unmatched: [0, 0, 0] },
-        { len: 0, liquidity: 0, matched: 2 },
-        { len: 0, liquidity: 0, matched: 2 },
         0,
       ],
     );
@@ -207,11 +202,8 @@ describe("Matching Crank", () => {
       await Promise.all([
         monaco.getOrder(forOrderPk),
         monaco.getOrder(againstOrderPk),
-
         market.getMarketPosition(purchaserA),
         market.getMarketPosition(purchaserB),
-        market.getForMatchingPool(outcome, price),
-        market.getAgainstMatchingPool(outcome, price),
         market.getEscrowBalance(),
       ]),
       [
@@ -219,8 +211,6 @@ describe("Matching Crank", () => {
         { stakeUnmatched: 0, stakeVoided: 0, status: { matched: {} } },
         { matched: [0, 0, 0], unmatched: [2, 0, 2] },
         { matched: [2, -10, 2], unmatched: [0, 0, 0] },
-        { len: 1, liquidity: 2, matched: 0 },
-        { len: 0, liquidity: 0, matched: 2 },
         12,
       ],
     );
@@ -235,11 +225,8 @@ describe("Matching Crank", () => {
       await Promise.all([
         monaco.getOrder(forOrderPk),
         monaco.getOrder(againstOrderPk),
-
         market.getMarketPosition(purchaserA),
         market.getMarketPosition(purchaserB),
-        market.getForMatchingPool(outcome, price),
-        market.getAgainstMatchingPool(outcome, price),
         market.getEscrowBalance(),
       ]),
       [
@@ -247,8 +234,6 @@ describe("Matching Crank", () => {
         { stakeUnmatched: 0, stakeVoided: 0, status: { matched: {} } },
         { matched: [-2, 10, -2], unmatched: [0, 0, 0] },
         { matched: [2, -10, 2], unmatched: [0, 0, 0] },
-        { len: 0, liquidity: 0, matched: 2 },
-        { len: 0, liquidity: 0, matched: 2 },
         12,
       ],
     );
@@ -371,18 +356,13 @@ describe("Matching Crank", () => {
       await Promise.all([
         monaco.getOrder(forOrderPk),
         monaco.getOrder(againstOrderPk),
-
         market.getMarketPosition(purchaser),
-        market.getForMatchingPool(outcome, price),
-        market.getAgainstMatchingPool(outcome, price),
         market.getEscrowBalance(),
       ]),
       [
         { stakeUnmatched: 2, stakeVoided: 0, status: { open: {} } },
         { stakeUnmatched: 0, stakeVoided: 0, status: { matched: {} } },
         { matched: [2, -10, 2], unmatched: [2, 0, 2] },
-        { len: 1, liquidity: 2, matched: 0 },
-        { len: 0, liquidity: 0, matched: 2 },
         10,
       ],
     );
@@ -451,18 +431,13 @@ describe("Matching Crank", () => {
       await Promise.all([
         monaco.getOrder(forOrderPk),
         monaco.getOrder(againstOrderPk),
-
         market.getMarketPosition(purchaser),
-        market.getForMatchingPool(outcome, price),
-        market.getAgainstMatchingPool(outcome, price),
         market.getEscrowBalance(),
       ]),
       [
         { stakeUnmatched: 2, stakeVoided: 0, status: { open: {} } },
         { stakeUnmatched: 0, stakeVoided: 0, status: { matched: {} } },
         { matched: [2, -10, 2], unmatched: [2, 0, 2] },
-        { len: 1, liquidity: 2, matched: 0 },
-        { len: 0, liquidity: 0, matched: 2 },
         10,
       ],
     );
@@ -542,18 +517,13 @@ describe("Matching Crank", () => {
       await Promise.all([
         monaco.getOrder(forOrderPk),
         monaco.getOrder(againstOrderPk),
-
         market.getMarketPosition(purchaser),
-        market.getForMatchingPool(outcome, price),
-        market.getAgainstMatchingPool(outcome, price),
         market.getEscrowBalance(),
       ]),
       [
         { stakeUnmatched: 2, stakeVoided: 0, status: { open: {} } },
         { stakeUnmatched: 0, stakeVoided: 0, status: { matched: {} } },
         { matched: [2, -10, 2], unmatched: [4, 0, 4] },
-        { len: 2, liquidity: 4, matched: 0 },
-        { len: 0, liquidity: 0, matched: 2 },
         10,
       ],
     );
@@ -629,16 +599,12 @@ describe("Matching Crank", () => {
         monaco.getOrder(forOrderPk),
         monaco.getOrder(againstOrderPk),
         market.getMarketPosition(purchaser),
-        market.getForMatchingPool(outcome, price),
-        market.getAgainstMatchingPool(outcome, price),
         market.getEscrowBalance(),
       ]),
       [
         { stakeUnmatched: 2, stakeVoided: 0, status: { open: {} } },
         { stakeUnmatched: 0, stakeVoided: 0, status: { matched: {} } },
         { matched: [2, -10, 2], unmatched: [2, 10, 2] },
-        { len: 1, liquidity: 2, matched: 0 },
-        { len: 1, liquidity: 2, matched: 2 },
         20,
       ],
     );
@@ -722,18 +688,13 @@ describe("Matching Crank", () => {
       await Promise.all([
         monaco.getOrder(forOrderPk),
         monaco.getOrder(againstOrderPk),
-
         market.getMarketPosition(purchaser),
-        market.getForMatchingPool(outcome, price),
-        market.getAgainstMatchingPool(outcome, price),
         market.getEscrowBalance(),
       ]),
       [
         { stakeUnmatched: 2, stakeVoided: 0, status: { open: {} } },
         { stakeUnmatched: 0, stakeVoided: 0, status: { matched: {} } },
         { matched: [2, -10, 2], unmatched: [2, 0, 2] },
-        { len: 2, liquidity: 4, matched: 0 },
-        { len: 0, liquidity: 0, matched: 2 },
         12,
       ],
     );
@@ -811,16 +772,12 @@ describe("Matching Crank", () => {
         monaco.getOrder(forOrderPk),
         monaco.getOrder(againstOrderPk),
         market.getMarketPosition(purchaser),
-        market.getForMatchingPool(outcome, price),
-        market.getAgainstMatchingPool(outcome, price),
         market.getEscrowBalance(),
       ]),
       [
         { stakeUnmatched: 2, stakeVoided: 0, status: { open: {} } },
         { stakeUnmatched: 0, stakeVoided: 0, status: { matched: {} } },
         { matched: [2, -10, 2], unmatched: [2, 0, 2] },
-        { len: 1, liquidity: 2, matched: 0 },
-        { len: 1, liquidity: 2, matched: 2 },
         20,
       ],
     );
@@ -890,16 +847,12 @@ describe("Matching Crank", () => {
         monaco.getOrder(forOrderPk),
         monaco.getOrder(againstOrderPk),
         market.getMarketPosition(purchaser),
-        market.getForMatchingPool(outcome, price),
-        market.getAgainstMatchingPool(outcome, price),
         market.getEscrowBalance(),
       ]),
       [
         { stakeUnmatched: 2, stakeVoided: 0, status: { open: {} } },
         { stakeUnmatched: 0, stakeVoided: 0, status: { matched: {} } },
         { matched: [2, -10, 2], unmatched: [2, 0, 2] },
-        { len: 1, liquidity: 2, matched: 0 },
-        { len: 0, liquidity: 0, matched: 2 },
         10,
       ],
     );
@@ -970,16 +923,12 @@ describe("Matching Crank", () => {
         monaco.getOrder(forOrderPk),
         monaco.getOrder(againstOrderPk),
         market.getMarketPosition(purchaser),
-        market.getForMatchingPool(outcome, price),
-        market.getAgainstMatchingPool(outcome, price),
         market.getEscrowBalance(),
       ]),
       [
         { stakeUnmatched: 2, stakeVoided: 0, status: { open: {} } },
         { stakeUnmatched: 0, stakeVoided: 0, status: { matched: {} } },
         { matched: [2, -10, 2], unmatched: [2, 0, 2] },
-        { len: 1, liquidity: 2, matched: 0 },
-        { len: 0, liquidity: 0, matched: 2 },
         10,
       ],
     );
@@ -1050,16 +999,12 @@ describe("Matching Crank", () => {
         monaco.getOrder(forOrderPk),
         monaco.getOrder(againstOrderPk),
         market.getMarketPosition(purchaser),
-        market.getForMatchingPool(outcome, price),
-        market.getAgainstMatchingPool(outcome, price),
         market.getEscrowBalance(),
       ]),
       [
         { stakeUnmatched: 2, stakeVoided: 0, status: { open: {} } },
         { stakeUnmatched: 0, stakeVoided: 0, status: { matched: {} } },
         { matched: [2, -10, 2], unmatched: [2, 0, 2] },
-        { len: 1, liquidity: 2, matched: 0 },
-        { len: 0, liquidity: 0, matched: 2 },
         10,
       ],
     );
@@ -1620,8 +1565,6 @@ async function setupMatchedOrders(
       monaco.getOrder(forOrderPk),
       monaco.getOrder(againstOrderPk),
       market.getMarketPosition(purchaser),
-      market.getForMatchingPool(outcomeIndex, price),
-      market.getAgainstMatchingPool(outcomeIndex, price),
       market.getEscrowBalance(),
     ]),
     [
@@ -1631,8 +1574,6 @@ async function setupMatchedOrders(
         matched: [stake, -stake * (price - 1), stake],
         unmatched: [stake, 0, stake],
       },
-      { len: 1, liquidity: stake, matched: 0 },
-      { len: 0, liquidity: 0, matched: stake },
       stake * (price - 1),
     ],
   );

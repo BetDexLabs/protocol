@@ -49,17 +49,20 @@ describe("Order Settlement Payment 1", () => {
     assert.deepEqual(
       await Promise.all([
         market.getMarketPosition(purchaser),
-        market.getForMatchingPool(outcomeA, price),
-        market.getForMatchingPool(outcomeB, price),
-        market.getForMatchingPool(outcomeC, price),
+        market.getMarketLiquidities(),
         market.getEscrowBalance(),
         market.getTokenBalance(purchaser),
       ]),
       [
         { matched: [0, 0, 0], unmatched: [20, 20, 20] },
-        { len: 1, liquidity: 10, matched: 0 },
-        { len: 1, liquidity: 10, matched: 0 },
-        { len: 1, liquidity: 10, matched: 0 },
+        {
+          liquiditiesAgainst: [],
+          liquiditiesFor: [
+            { liquidity: 10, outcome: 0, price: 2, sources: [] },
+            { liquidity: 10, outcome: 1, price: 2, sources: [] },
+            { liquidity: 10, outcome: 2, price: 2, sources: [] },
+          ],
+        },
         20,
         80,
       ],
@@ -104,17 +107,20 @@ describe("Order Settlement Payment 1", () => {
     assert.deepEqual(
       await Promise.all([
         market.getMarketPosition(purchaser),
-        market.getForMatchingPool(outcomeA, price),
-        market.getForMatchingPool(outcomeB, price),
-        market.getForMatchingPool(outcomeC, price),
+        market.getMarketLiquidities(),
         market.getEscrowBalance(),
         market.getTokenBalance(purchaser),
       ]),
       [
         { matched: [0, 0, 0], unmatched: [20, 20, 20] },
-        { len: 1, liquidity: 10, matched: 0 },
-        { len: 1, liquidity: 10, matched: 0 },
-        { len: 1, liquidity: 10, matched: 0 },
+        {
+          liquiditiesAgainst: [],
+          liquiditiesFor: [
+            { liquidity: 10, outcome: 0, price: 3, sources: [] },
+            { liquidity: 10, outcome: 1, price: 3, sources: [] },
+            { liquidity: 10, outcome: 2, price: 3, sources: [] },
+          ],
+        },
         20,
         80,
       ],
@@ -160,17 +166,20 @@ describe("Order Settlement Payment 1", () => {
     assert.deepEqual(
       await Promise.all([
         market.getMarketPosition(purchaser),
-        market.getForMatchingPool(outcomeA, price),
-        market.getForMatchingPool(outcomeB, price),
-        market.getForMatchingPool(outcomeC, price),
+        market.getMarketLiquidities(),
         market.getEscrowBalance(),
         market.getTokenBalance(purchaser),
       ]),
       [
         { matched: [0, 0, 0], unmatched: [20, 20, 20] },
-        { len: 1, liquidity: 10, matched: 0 },
-        { len: 1, liquidity: 10, matched: 0 },
-        { len: 1, liquidity: 10, matched: 0 },
+        {
+          liquiditiesAgainst: [],
+          liquiditiesFor: [
+            { liquidity: 10, outcome: 0, price: 4, sources: [] },
+            { liquidity: 10, outcome: 1, price: 4, sources: [] },
+            { liquidity: 10, outcome: 2, price: 4, sources: [] },
+          ],
+        },
         20,
         80,
       ],
