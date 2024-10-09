@@ -96,12 +96,7 @@ describe("Order Cancelation Payment 10", () => {
     );
 
     // Cancel For 10
-    try {
-      await market.cancel(forOrderPk, purchaser);
-      assert.fail("expected CancelOrderNotCancellable");
-    } catch (e) {
-      assert.equal(e.error.errorCode.code, "CancelOrderNotCancellable");
-    }
+    await market.cancel(forOrderPk, purchaser);
 
     assert.deepEqual(
       await Promise.all([
@@ -163,12 +158,7 @@ describe("Order Cancelation Payment 10", () => {
     );
 
     // Cancel For 10
-    try {
-      await market.cancel(forOrderPk, purchaser);
-      assert.fail("expected CancelOrderNotCancellable");
-    } catch (e) {
-      assert.equal(e.error.errorCode.code, "CancelOrderNotCancellable");
-    }
+    await market.cancel(forOrderPk, purchaser);
 
     assert.deepEqual(
       await Promise.all([
@@ -258,9 +248,9 @@ describe("Order Cancelation Payment 10", () => {
     // Cancel Against 5
     try {
       await market.cancel(againstOrderPk, purchaser);
-      assert.fail("expected CancelOrderNotCancellable");
+      assert.fail("expected CancelationLowLiquidity");
     } catch (e) {
-      assert.equal(e.error.errorCode.code, "CancelOrderNotCancellable");
+      assert.equal(e.error.errorCode.code, "CancelationLowLiquidity");
     }
 
     assert.deepEqual(
@@ -361,9 +351,9 @@ describe("Order Cancelation Payment 10", () => {
     // Cancel Against 5
     try {
       await market.cancel(againstOrderPk, purchaser);
-      assert.fail("expected CancelOrderNotCancellable");
+      assert.fail("expected CancelationLowLiquidity");
     } catch (e) {
-      assert.equal(e.error.errorCode.code, "CancelOrderNotCancellable");
+      assert.equal(e.error.errorCode.code, "CancelationLowLiquidity");
     }
 
     assert.deepEqual(

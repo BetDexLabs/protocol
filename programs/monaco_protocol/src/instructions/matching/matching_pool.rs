@@ -91,20 +91,3 @@ pub fn update_matching_pool_with_matched_order(
 
     Ok(())
 }
-
-pub fn update_on_cancel(
-    market: &Market,
-    market_matching_queue: &MarketMatchingQueue,
-    matching_pool: &mut MarketMatchingPool,
-    order: &Account<Order>,
-) -> Result<bool> {
-    if market.is_inplay() && !matching_pool.inplay {
-        require!(
-            market_matching_queue.matches.is_empty(),
-            CoreError::InplayTransitionMarketMatchingQueueIsNotEmpty
-        );
-        matching_pool.move_to_inplay(&market.event_start_order_behaviour);
-    }
-
-    Ok(matching_pool.orders.remove(&order.key()).is_some())
-}
