@@ -1567,6 +1567,25 @@ export class MonacoMarket {
       });
   }
 
+  async updateMarketLockTime(marketLockTime: number) {
+    await this.monaco.program.methods
+      .updateMarketLocktime(new BN(marketLockTime))
+      .accounts({
+        market: this.pk,
+        authorisedOperators:
+          await this.monaco.findMarketAuthorisedOperatorsPda(),
+        marketOperator: this.marketAuthority
+          ? this.marketAuthority.publicKey
+          : this.monaco.operatorPk,
+      })
+      .signers(this.marketAuthority ? [this.marketAuthority] : [])
+      .rpc()
+      .catch((e) => {
+        console.error(e);
+        throw e;
+      });
+  }
+
   async updateMarketLockTimeToNow() {
     await this.monaco.program.methods
       .updateMarketLocktimeToNow()

@@ -30,7 +30,7 @@
   "scripts": {
     "build": "cd npm-client && npm install && npm run build && cd - && cd npm-admin-client && npm install && npm run build && cd - && anchor build",
     "test": "anchor test",
-    "runJestTests": "jest --silent --forceExit",
+    "runJestTests": "jest --forceExit",
     "lint": "eslint --fix .",
     "format": "prettier --write \"**/*.{ts,js}\"",
     "prepare": "husky install",
