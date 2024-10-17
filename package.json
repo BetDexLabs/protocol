@@ -39,6 +39,7 @@
     "lint": "eslint --fix .",
     "format": "prettier --write \"**/*.{ts,js}\"",
     "prepare": "husky install",
+    "xmatch": "ts-node admin/client.ts xmatch",
     "getAll": "ts-node admin/client.ts getAll",
     "createPriceLadder": "ts-node admin/client.ts createPriceLadder",
     "createMarketType": "ts-node admin/client.ts createMarketType",

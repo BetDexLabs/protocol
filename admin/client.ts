@@ -29,6 +29,7 @@ import {
 } from "./market_types";
 import { createPriceLadder } from "./price_ladders";
 import { printMarket } from "./print_market";
+import { processMarketLiquidities } from "./cross_matching";
 
 if (process.argv.length < 3) {
   printUsageAndExit();
@@ -40,6 +41,9 @@ anchor.setProvider(provider);
 const script = process.argv[2];
 
 switch (script) {
+  case "xmatch":
+    processMarketLiquidities();
+    break;
   case "getAll":
     getAll();
     break;
