@@ -65,7 +65,9 @@
     "authoriseAdminOperator": "ts-node admin/client.ts authoriseAdminOperator",
     "printAuthorisedOperatorAccounts": "ts-node admin/client.ts printAuthorisedOperatorAccounts",
     "addPricesToLadder": "ts-node admin/client.ts addPricesToLadder",
-    "createProduct": "ts-node admin/client.ts createProduct"
+    "createProduct": "ts-node admin/client.ts createProduct",
+    "forceVoidMarket": "ts-node admin/client.ts forceVoidMarket",
+    "forceUnsettledCount": "ts-node admin/client.ts forceUnsettledCount"
   },
   "lint-staged": {
     "*.{js,ts}": [

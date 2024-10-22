@@ -11,6 +11,8 @@ import {
   suspend_market,
   unpublish_market,
   unsuspend_market,
+  forceVoidMarket,
+  forceUnsettledCount,
 } from "./update_market_status";
 import { print_order } from "./orders";
 import { getAll, getAllMarkets, getAllOrders } from "./get_all";
@@ -120,6 +122,12 @@ switch (script) {
     break;
   case "createProduct":
     create_product();
+    break;
+  case "forceVoidMarket":
+    forceVoidMarket();
+    break;
+  case "forceUnsettledCount":
+    forceUnsettledCount();
     break;
   default:
     printUsageAndExit();
