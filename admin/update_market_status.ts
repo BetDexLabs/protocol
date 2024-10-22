@@ -178,7 +178,7 @@ export async function forceVoidMarket() {
   const instruction = await program.methods
     .forceVoidMarket()
     .accounts({
-      market: new PublicKey(marketPk),
+      market: marketPk,
       marketEscrow: marketEscrow.data.pda,
       authorisedOperators: authorisedOperators.data.pda,
       marketOperator: program.provider.publicKey,
@@ -192,6 +192,7 @@ export async function forceVoidMarket() {
     .instruction();
 
   const transaction = await signAndSendInstructions(program, [instruction]);
+  console.log(transaction.errors);
   console.log(`Transaction: ${transaction.data.signature}`);
 }
 

@@ -30,8 +30,8 @@
   "scripts": {
     "buildClient": "cd npm-client && npm install && npm run build && cd -",
     "buildAdminClient": "cd npm-admin-client && npm install && npm run build && cd -",
-    "buildMonaco": "anchor build -v",
-    "buildMonacoForEdge": "anchor build -v -- --features edge",
+    "buildMonaco": "anchor build",
+    "buildMonacoForEdge": "anchor build -- --features edge",
     "build": "yarn buildClient && yarn buildAdminClient && yarn buildMonaco",
 
     "test": "anchor test",
